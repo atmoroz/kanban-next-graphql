@@ -1,56 +1,57 @@
 # Site Structure — Next.js Kanban (FSD)
 
 src/
-├── app/ # Next.js routing (NO business logic)
+├── app/ # ТОЛЬКО routing (Next.js App Router)
 │ ├── layout.tsx
 │ ├── page.tsx # Public dashboard
-│ ├── login/
-│ ├── register/
-│ └── board/[boardId]/
+│ ├── login/page.tsx
+│ ├── register/page.tsx
+│ ├── board/[boardId]/page.tsx
+│ ├── api/ # если нужен route handler
+│ ├── sitemap.ts
+│ ├── robots.ts
+│ └── favicon.ico
 │
-├── processes/ # Long-running flows
-│ ├── auth/
-│ └── realtime/
-│
-├── widgets/ # Page-level UI blocks
+├── widgets/ # Крупные UI-блоки страниц
 │ ├── header/
 │ ├── sidebar/
 │ ├── kanban-board/
-│ ├── column/
-│ └── activity-feed/
+│ ├── activity-feed/
+│ └── auth-form/
 │
-├── features/ # User actions
+├── features/ # Действия пользователя
 │ ├── auth/
 │ ├── create-board/
 │ ├── create-task/
 │ ├── move-task/
 │ ├── update-task/
 │ ├── filters/
-│ └── subscriptions-sync/
+│ └── subscriptions/
 │
-├── entities/ # Business entities
+├── entities/ # Бизнес-сущности
 │ ├── board/
 │ ├── column/
 │ ├── task/
 │ ├── activity/
 │ └── user/
 │
-├── shared/
-│ ├── ui/ # Reusable UI components
-│ ├── lib/ # Helpers, hooks
-│ ├── api/ # Apollo client, links
-│ ├── config/ # Env, constants
-│ └── types/
+├── shared/ # Инфраструктура
+│ ├── ui/ # Button, Input, Modal
+│ ├── lib/ # helpers, hooks
+│ ├── api/ # Apollo client setup
+│ ├── config/ # env.ts, constants
+│ ├── types/
+│ └── styles/
 │
-├── graphql/
+├── graphql/ # GraphQL слой
 │ ├── queries/
 │ ├── mutations/
 │ ├── subscriptions/
 │ ├── fragments/
-│ └── generated/ # Codegen output
+│ └── generated/
 │
-├── stores/ # Zustand stores
+├── stores/ # Zustand (если нужен)
 │ ├── ui.store.ts
 │ └── filters.store.ts
 │
-└── middleware.ts # Auth / SSR cookies
+middleware.ts # В КОРНЕ
