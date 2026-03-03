@@ -3,6 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Kanban } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui/card";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
 
 export function LoginForm() {
   const router = useRouter();
@@ -36,59 +48,60 @@ export function LoginForm() {
   };
 
   return (
-    <section className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-10">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold">Вход</h1>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Введите email и пароль для входа в аккаунт.
-        </p>
-      </div>
-      <form className="space-y-4" onSubmit={handleSubmit}>
-        {error && (
-          <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400">
-            {error}
-          </p>
-        )}
-        <div className="space-y-1">
-          <label className="block text-sm font-medium" htmlFor="email">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-md border border-zinc-300 bg-background px-3 py-2 text-sm shadow-sm outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-500/30 dark:border-zinc-700"
-          />
-        </div>
-        <div className="space-y-1">
-          <label className="block text-sm font-medium" htmlFor="password">
-            Пароль
-          </label>
-          <input
-            id="password"
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-md border border-zinc-300 bg-background px-3 py-2 text-sm shadow-sm outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-500/30 dark:border-zinc-700"
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="inline-flex w-full items-center justify-center rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-zinc-50 shadow-sm transition hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
-        >
-          {loading ? "Вход…" : "Войти"}
-        </button>
-      </form>
-      <p className="text-xs text-zinc-600 dark:text-zinc-400">
-        Нет аккаунта?{" "}
-        <Link href="/register" className="font-medium underline">
-          Зарегистрироваться
-        </Link>
-      </p>
-    </section>
+    <div className="flex min-h-full flex-1 items-center justify-center px-4 py-10">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-4 text-center">
+          <div className="mx-auto flex size-12 items-center justify-center rounded-lg bg-primary">
+            <Kanban className="size-7 text-primary-foreground" />
+          </div>
+          <div>
+            <CardTitle className="text-2xl">Welcome back</CardTitle>
+            <CardDescription>Sign in to your TaskFlow account</CardDescription>
+          </div>
+        </CardHeader>
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
+            {error && (
+              <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                {error}
+              </p>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-4">
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Signing in…" : "Sign in"}
+            </Button>
+            <p className="text-center text-sm text-muted-foreground">
+              Don&apos;t have an account?{" "}
+              <Link href="/register" className="text-primary hover:underline">
+                Sign up
+              </Link>
+            </p>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
   );
 }

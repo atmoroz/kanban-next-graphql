@@ -1,11 +1,6 @@
 import { cookies } from "next/headers";
+import type { MeUser } from "@/entities/user";
 import { env } from "@/shared/config/env";
-
-export type MeUser = {
-  id: string;
-  email: string;
-  name: string | null;
-};
 
 type MeResponse = {
   data?: {
