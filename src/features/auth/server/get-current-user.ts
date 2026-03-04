@@ -37,6 +37,7 @@ export async function getCurrentUser(): Promise<MeUser | null> {
             id
             email
             name
+            createdAt
           }
         }
       `,
@@ -63,4 +64,3 @@ export async function getCurrentUser(): Promise<MeUser | null> {
 
   return json.data?.me ?? null;
 }
-

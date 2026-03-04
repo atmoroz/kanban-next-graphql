@@ -3,16 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Kanban, Moon, Sun } from "lucide-react";
-import type { MeUser } from "@/entities/user";
 import { useLogout } from "@/features/auth/logout";
 import { cn } from "@/shared/lib/cn";
 import { useTheme } from "@/shared/lib/useTheme";
+import { useUser } from "@/shared/providers/auth-provider";
 
-type HeaderProps = {
-  user: MeUser | null;
-};
-
-export function Header({ user }: HeaderProps) {
+export function Header() {
+  const user = useUser();
   const { logout } = useLogout();
   const { toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);

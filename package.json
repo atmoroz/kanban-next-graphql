@@ -8,10 +8,15 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --check .",
-    "format:fix": "prettier --write ."
+    "format:fix": "prettier --write .",
+    "codegen": "graphql-codegen",
+    "codegen:watch": "graphql-codegen --watch"
   },
   "dependencies": {
+    "@apollo/client": "^4.1.6",
     "clsx": "^2.1.1",
+    "graphql": "^16.13.1",
+    "graphql-ws": "^6.0.7",
     "lucide-react": "^0.576.0",
     "next": "16.1.6",
     "nextjs-toploader": "^3.9.17",
@@ -20,6 +25,8 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^6.1.2",
+    "@graphql-codegen/client-preset": "^5.2.3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

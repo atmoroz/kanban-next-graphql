@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Kanban } from "lucide-react";
+import { Kanban, Loader2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -102,6 +102,9 @@ export function RegisterForm() {
           <CardFooter className="flex flex-col gap-4">
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Creating account…" : "Create account"}
+              {loading && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+              )}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
               Already have an account?{" "}

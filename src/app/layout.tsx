@@ -7,6 +7,7 @@ import { getCurrentUser } from "@/features/auth/server/get-current-user";
 import { cookies } from "next/headers";
 import { DEFAULT_THEME, THEME_COOKIE_NAME, type Theme } from "@/shared/config/theme";
 import { TopLoader } from "@/shared/ui/top-loader";
+import { AppProviders } from "./providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,12 +40,14 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
-        <div className="flex min-h-screen flex-col">
-          <TopLoader />
-          <Header user={user} />
-          <main className="flex flex-1">{children}</main>
-          <Footer />
-        </div>
+        <AppProviders user={user}>
+          <div className="flex min-h-screen flex-col">
+            <TopLoader />
+            <Header />
+            <main className="flex flex-1">{children}</main>
+            <Footer />
+          </div>
+        </AppProviders>
       </body>
     </html>
   );
