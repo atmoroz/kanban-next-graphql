@@ -1,16 +1,17 @@
 "use client";
 
-import { ApolloClient, InMemoryCache } from "@apollo/client";
+import { ApolloClient, InMemoryCache, ApolloLink } from "@apollo/client";
 import { apolloLink } from "./apolloLinks";
+import { errorLink, feedbackLink } from "@/shared/lib/apollo/errorLink";
 
 function createApolloClient() {
   return new ApolloClient({
-    link: apolloLink,
+    link: ApolloLink.from([errorLink, feedbackLink, apolloLink]),
     cache: new InMemoryCache({
       typePolicies: {
         Query: {
           fields: {
-            // При необходимости можно добавить keyArgs и merge для пагинируемых полей (boards, tasksByColumn и т.д.)
+            // Add keyArgs and merge for paginated fields (boards, tasksByColumn, etc.) when needed.
           },
         },
         Board: {

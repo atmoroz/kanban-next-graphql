@@ -35,13 +35,13 @@ export function LoginForm() {
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {
-        setError(data.error ?? "Ошибка входа");
+        setError(data.error ?? "Sign-in failed");
         return;
       }
       router.push("/");
       router.refresh();
     } catch {
-      setError("Ошибка сети");
+      setError("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
