@@ -20,7 +20,7 @@ export async function getCurrentUser(): Promise<MeUser | null> {
   const endpoint = env.server.GRAPHQL_API_URL;
 
   if (!endpoint) {
-    // Без URL до GraphQL-сервера не можем выполнить me-запрос.
+    // Without a GraphQL API URL we cannot execute the me query.
     return null;
   }
 

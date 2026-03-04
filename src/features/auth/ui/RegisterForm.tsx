@@ -36,13 +36,13 @@ export function RegisterForm() {
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {
-        setError(data.error ?? "Ошибка регистрации");
+        setError(data.error ?? "Registration failed");
         return;
       }
       router.push("/");
       router.refresh();
     } catch {
-      setError("Ошибка сети");
+      setError("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
