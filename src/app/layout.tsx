@@ -4,6 +4,9 @@ import "@/app/globals.css";
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
 import { getCurrentUser } from "@/features/auth/server/get-current-user";
+import { cookies } from "next/headers";
+import { DEFAULT_THEME, THEME_COOKIE_NAME, type Theme } from "@/shared/config/theme";
+import { TopLoader } from "@/shared/ui/top-loader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,19 +29,23 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const user = await getCurrentUser();
+  const cookieStore = await cookies();
+  const cookieTheme = cookieStore.get(THEME_COOKIE_NAME)?.value;
 
+  const theme: Theme =
+    cookieTheme === "dark" || cookieTheme === "light" ? cookieTheme : DEFAULT_THEME;
   return (
-    <html lang="en">
+    <html lang="en" data-theme={theme}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
         <div className="flex min-h-screen flex-col">
+          <TopLoader />
           <Header user={user} />
-          <main className="flex-1">{children}</main>
+          <main className="flex flex-1">{children}</main>
           <Footer />
         </div>
       </body>
     </html>
   );
 }
-

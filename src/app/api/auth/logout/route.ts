@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-
-const AUTH_COOKIE_NAME = "auth_token";
+import { AUTH_COOKIE_NAME } from "@/shared/config/auth";
 
 export async function POST() {
   const response = NextResponse.json({ ok: true });

@@ -8,10 +8,9 @@ export default function HomePage() {
         <CreateBoardButton className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90" />
       </div>
       <p className="max-w-xl text-sm text-muted-foreground">
-        Публичная доска будет отображаться здесь. На данном этапе EPIC-01 мы
-        настраиваем только инфраструктуру, layout и базовую страницу.
+        Публичная доска будет отображаться здесь. На данном этапе EPIC-01 мы настраиваем
+        только инфраструктуру, layout и базовую страницу.
       </p>
     </section>
   );
 }
-

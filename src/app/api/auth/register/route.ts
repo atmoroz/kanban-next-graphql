@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { env } from "@/shared/config/env";
+import { AUTH_COOKIE_NAME } from "@/shared/config/auth";
 import { REGISTER_MUTATION } from "@/graphql/mutations/auth";
 
-const AUTH_COOKIE_NAME = "auth_token";
 const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 type AuthPayload = {
   token: string;
