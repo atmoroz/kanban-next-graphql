@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { env } from "@/shared/config/env";
+import { AUTH_COOKIE_NAME } from "@/shared/config/auth";
 import { LOGIN_MUTATION } from "@/graphql/mutations/auth";
 
-const AUTH_COOKIE_NAME = "auth_token";
 const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
 type AuthPayload = {
@@ -28,10 +28,7 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: "Invalid JSON body" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
   const { email, password } = body;
@@ -53,10 +50,7 @@ export async function POST(request: NextRequest) {
   });
 
   if (!res.ok) {
-    return NextResponse.json(
-      { error: "Auth service unavailable" },
-      { status: 502 },
-    );
+    return NextResponse.json({ error: "Auth service unavailable" }, { status: 502 });
   }
 
   const json = (await res.json()) as GraphQLResponse;
@@ -70,10 +64,7 @@ export async function POST(request: NextRequest) {
 
   const token = json.data?.login?.token;
   if (!token) {
-    return NextResponse.json(
-      { error: "No token in response" },
-      { status: 502 },
-    );
+    return NextResponse.json({ error: "No token in response" }, { status: 502 });
   }
 
   const response = NextResponse.json({ ok: true });
