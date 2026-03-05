@@ -38,13 +38,13 @@ export default async function RootLayout({
   return (
     <html lang="en" data-theme={theme}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground h-screen overflow-hidden`}
       >
         <AppProviders user={user}>
-          <div className="flex min-h-screen flex-col">
+          <div className="flex h-screen flex-col">
             <TopLoader />
             <Header />
-            <main className="flex flex-1">{children}</main>
+            <main className="flex flex-1 overflow-hidden">{children}</main>
             <Footer />
           </div>
         </AppProviders>
