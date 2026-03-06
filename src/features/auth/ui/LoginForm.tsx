@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Kanban, Loader2 } from "lucide-react";
+import { useApolloClient } from "@apollo/client/react";
 import {
   Card,
   CardContent,
@@ -18,6 +19,7 @@ import { Label } from "@/shared/ui/label";
 
 export function LoginForm() {
   const router = useRouter();
+  const apolloClient = useApolloClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +40,8 @@ export function LoginForm() {
         setError(data.error ?? "Sign-in failed");
         return;
       }
+
+      await apolloClient.clearStore();
       router.push("/");
       router.refresh();
     } catch {

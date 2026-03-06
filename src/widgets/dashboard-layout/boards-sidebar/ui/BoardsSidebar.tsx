@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/shared/lib/cn";
 import { CreateBoardButton } from "@/features/create-board";
 import { BoardsSidebarProps } from "@/entities/board";
 import { PublicBoards } from "./PublicBoards";
 import { PrivateBoards } from "./PrivateBoards";
+import { useUser } from "@/shared/providers/auth-provider";
 
 export function BoardsSidebar({
   boards,
@@ -14,6 +14,7 @@ export function BoardsSidebar({
   isLoading,
 }: BoardsSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const user = useUser();
 
   const publicBoards = boards.filter((b) => b.visibility === "PUBLIC");
   const privateBoards = boards.filter((b) => b.visibility === "PRIVATE");
@@ -62,26 +63,29 @@ export function BoardsSidebar({
             selectedBoardId={selectedBoardId}
           />
         </div>
-
-        <div>
-          <div className="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary/10 text-[10px] text-primary">
-              L
-            </span>
-            <span>Private Boards</span>
+        {user && !!privateBoards.length && (
+          <div>
+            <div className="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary/10 text-[10px] text-primary">
+                L
+              </span>
+              <span>Private Boards</span>
+            </div>
+            <PrivateBoards
+              isLoading={isLoading ?? false}
+              privateBoards={privateBoards}
+              onSelectBoard={onSelectBoard}
+              selectedBoardId={selectedBoardId}
+            />
           </div>
-          <PrivateBoards
-            isLoading={isLoading ?? false}
-            privateBoards={privateBoards}
-            onSelectBoard={onSelectBoard}
-            selectedBoardId={selectedBoardId}
-          />
-        </div>
+        )}
       </div>
 
-      <div className="border-t border-border p-4">
-        <CreateBoardButton className="inline-flex h-9 w-full items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90" />
-      </div>
+      {user && (
+        <div className="border-t border-border p-4">
+          <CreateBoardButton className="inline-flex h-9 w-full items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90" />
+        </div>
+      )}
     </aside>
   );
 }

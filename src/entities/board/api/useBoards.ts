@@ -17,7 +17,7 @@ export function useBoards(): UseBoardsResult {
     variables: {
       first: 20,
       sortBy: BoardSortBy.UpdatedAt,
-      sortOrder: SortOrder.Desc,
+      sortOrder: SortOrder.Asc,
     },
   });
 

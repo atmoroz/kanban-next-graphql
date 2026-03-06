@@ -1,7 +1,9 @@
+import { BoardVisibility } from "@/graphql/generated/graphql";
+
 export type SidebarBoard = {
   id: string;
   title: string;
-  visibility: "PUBLIC" | "PRIVATE";
+  visibility: BoardVisibility;
   tasksCount: number;
 };
 
@@ -16,4 +18,3 @@ export type BoardsSidebarProps = {
   onSelectBoard: (id: string) => void;
   isLoading?: boolean;
 };
-
