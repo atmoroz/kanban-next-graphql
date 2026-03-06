@@ -21,13 +21,22 @@ const DEFAULT_VALUES: CreateBoardFormValues = {
 type CreateBoardFormProps = {
   onSubmit: (values: CreateBoardFormValues) => void;
   isLoading?: boolean;
+  initialValues?: Partial<CreateBoardFormValues>;
+  formId?: string;
 };
 
-export function CreateBoardForm({ onSubmit, isLoading }: CreateBoardFormProps) {
-  const [title, setTitle] = useState(DEFAULT_VALUES.title);
-  const [description, setDescription] = useState(DEFAULT_VALUES.description);
+export function CreateBoardForm({
+  onSubmit,
+  isLoading,
+  initialValues,
+  formId = "create",
+}: CreateBoardFormProps) {
+  const [title, setTitle] = useState(initialValues?.title ?? DEFAULT_VALUES.title);
+  const [description, setDescription] = useState(
+    initialValues?.description ?? DEFAULT_VALUES.description,
+  );
   const [visibility, setVisibility] = useState<BoardVisibility>(
-    DEFAULT_VALUES.visibility,
+    initialValues?.visibility ?? DEFAULT_VALUES.visibility,
   );
 
   const handleSubmit = useCallback(
@@ -45,7 +54,7 @@ export function CreateBoardForm({ onSubmit, isLoading }: CreateBoardFormProps) {
   );
 
   return (
-    <form id="create-board-form" onSubmit={handleSubmit} className="space-y-4">
+    <form id={`board-form-${formId}`} onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="board-title">Title</Label>
         <Input

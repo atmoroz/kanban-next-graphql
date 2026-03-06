@@ -1,12 +1,13 @@
 import * as React from "react";
 import { cn } from "@/shared/lib/cn";
 type ButtonProps = React.ComponentProps<"button"> & {
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "destructive";
 };
 
 const VARIANTS = {
   primary: "bg-primary text-primary-foreground hover:bg-primary/90",
   secondary: "border border-border bg-transparent hover:bg-muted text-foreground",
+  destructive: "bg-destructive text-background hover:bg-destructive/90",
 };
 
 function Button({

@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/shared/ui/button";
-import { cn } from "@/shared/lib/cn";
 import { Loader2 } from "lucide-react";
 
 type ModalFooterProps = {
@@ -11,6 +10,8 @@ type ModalFooterProps = {
   cancelText?: string;
   showCancel?: boolean;
   isLoading?: boolean;
+  /** Вариант кнопки подтверждения (например "destructive" для удаления) */
+  okVariant?: "primary" | "secondary" | "destructive";
 };
 
 export function ModalFooter({
@@ -20,6 +21,7 @@ export function ModalFooter({
   cancelText = "Cancel",
   showCancel = true,
   isLoading = false,
+  okVariant = "primary",
 }: ModalFooterProps) {
   return (
     <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
@@ -29,7 +31,13 @@ export function ModalFooter({
         </Button>
       )}
       {onOk && (
-        <Button type="button" onClick={onOk} className="px-4" disabled={isLoading}>
+        <Button
+          type="button"
+          variant={okVariant}
+          onClick={onOk}
+          className="px-4"
+          disabled={isLoading}
+        >
           {isLoading ? (
             <>
               {okText}

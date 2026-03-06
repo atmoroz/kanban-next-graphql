@@ -3,6 +3,7 @@ import { BoardVisibility } from "@/graphql/generated/graphql";
 export type SidebarBoard = {
   id: string;
   title: string;
+  description?: string | null;
   visibility: BoardVisibility;
   tasksCount: number;
 };
