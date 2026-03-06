@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    sameSite: "lax",
+    sameSite: "none",
     maxAge: AUTH_COOKIE_MAX_AGE,
   });
 

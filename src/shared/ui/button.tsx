@@ -1,11 +1,21 @@
 import * as React from "react";
 import { cn } from "@/shared/lib/cn";
+type ButtonProps = React.ComponentProps<"button"> & {
+  variant?: "primary" | "secondary" | "destructive";
+};
+
+const VARIANTS = {
+  primary: "bg-primary text-primary-foreground hover:bg-primary/90",
+  secondary: "border border-border bg-transparent hover:bg-muted text-foreground",
+  destructive: "bg-destructive text-background hover:bg-destructive/90",
+};
 
 function Button({
   className,
+  variant = "primary",
   type = "button",
   ...props
-}: React.ComponentProps<"button">) {
+}: ButtonProps) {
   return (
     <button
       type={type}
@@ -13,7 +23,7 @@ function Button({
       className={cn(
         "inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors",
         "disabled:pointer-events-none disabled:opacity-50",
-        "bg-primary text-primary-foreground hover:bg-primary/90",
+        VARIANTS[variant],
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         "[&_svg]:size-4 [&_svg]:shrink-0",
         className,

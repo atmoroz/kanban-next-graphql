@@ -1,0 +1,11 @@
+query Board($id: ID!) {
+  board(id: $id) {
+    id
+    title
+    description
+    visibility
+    createdAt
+    updatedAt
+  }
+}
+

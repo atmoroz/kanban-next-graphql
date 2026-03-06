@@ -1,22 +1,19 @@
 "use client";
 
 import { Plus } from "lucide-react";
+import { Button } from "@/shared/ui/button";
 
 type CreateBoardButtonProps = {
   className?: string;
+  /** Вызывается по клику — родитель открывает модалку создания (например BoardFormModal с mode="create") */
+  onOpenCreate: () => void;
 };
 
-export function CreateBoardButton({ className }: CreateBoardButtonProps) {
+export function CreateBoardButton({ className, onOpenCreate }: CreateBoardButtonProps) {
   return (
-    <button
-      type="button"
-      className={className}
-      onClick={() => {
-        // TODO: open create board modal/form (EPIC-04)
-      }}
-    >
+    <Button type="button" className={className} onClick={onOpenCreate}>
       <Plus className="size-4" />
       Create board
-    </button>
+    </Button>
   );
 }
