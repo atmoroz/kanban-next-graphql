@@ -1,0 +1,14 @@
+mutation CreateBoard(
+  $title: String!
+  $description: String
+  $visibility: BoardVisibility!
+) {
+  createBoard(title: $title, description: $description, visibility: $visibility) {
+    id
+    title
+    description
+    visibility
+    createdAt
+    updatedAt
+  }
+}

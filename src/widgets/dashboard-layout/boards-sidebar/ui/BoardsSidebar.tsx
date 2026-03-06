@@ -3,12 +3,15 @@
 import { useState } from "react";
 import { cn } from "@/shared/lib/cn";
 import { CreateBoardButton } from "@/features/create-board";
-import { BoardsSidebarProps } from "@/entities/dashboard";
+import { BoardsSidebarProps } from "@/entities/board";
+import { PublicBoards } from "./PublicBoards";
+import { PrivateBoards } from "./PrivateBoards";
 
 export function BoardsSidebar({
   boards,
   selectedBoardId,
   onSelectBoard,
+  isLoading,
 }: BoardsSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
 
@@ -52,31 +55,12 @@ export function BoardsSidebar({
             </span>
             <span>Public Boards</span>
           </div>
-          <div className="space-y-1">
-            {publicBoards.map((board) => (
-              <button
-                key={board.id}
-                type="button"
-                onClick={() => onSelectBoard(board.id)}
-                className={cn(
-                  "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors",
-                  selectedBoardId === board.id
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-muted",
-                )}
-              >
-                <span className="truncate">{board.title}</span>
-                <span
-                  className={cn(
-                    "ml-2 inline-flex min-w-8 items-center justify-center rounded-full bg-background px-2 text-xs font-medium",
-                    selectedBoardId === board.id && "bg-primary-foreground/20",
-                  )}
-                >
-                  {board.tasksCount}
-                </span>
-              </button>
-            ))}
-          </div>
+          <PublicBoards
+            isLoading={isLoading ?? false}
+            publicBoards={publicBoards}
+            onSelectBoard={onSelectBoard}
+            selectedBoardId={selectedBoardId}
+          />
         </div>
 
         <div>
@@ -86,36 +70,12 @@ export function BoardsSidebar({
             </span>
             <span>Private Boards</span>
           </div>
-          <div className="space-y-1">
-            {privateBoards.map((board) => (
-              <button
-                key={board.id}
-                type="button"
-                onClick={() => onSelectBoard(board.id)}
-                className={cn(
-                  "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors",
-                  selectedBoardId === board.id
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-muted",
-                )}
-              >
-                <span className="truncate flex items-center gap-2">
-                  <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary/10 text-[10px] text-primary">
-                    *
-                  </span>
-                  {board.title}
-                </span>
-                <span
-                  className={cn(
-                    "ml-2 inline-flex min-w-8 items-center justify-center rounded-full bg-background px-2 text-xs font-medium",
-                    selectedBoardId === board.id && "bg-primary-foreground/20",
-                  )}
-                >
-                  {board.tasksCount}
-                </span>
-              </button>
-            ))}
-          </div>
+          <PrivateBoards
+            isLoading={isLoading ?? false}
+            privateBoards={privateBoards}
+            onSelectBoard={onSelectBoard}
+            selectedBoardId={selectedBoardId}
+          />
         </div>
       </div>
 

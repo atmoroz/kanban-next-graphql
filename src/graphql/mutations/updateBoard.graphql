@@ -1,0 +1,20 @@
+mutation UpdateBoard(
+  $id: ID!
+  $title: String
+  $description: String
+  $visibility: BoardVisibility
+) {
+  updateBoard(
+    id: $id
+    title: $title
+    description: $description
+    visibility: $visibility
+  ) {
+    id
+    title
+    description
+    visibility
+    createdAt
+    updatedAt
+  }
+}
