@@ -5,9 +5,18 @@ import { showErrorToast } from "@/shared/lib/toast";
 export const errorLink = new ErrorLink(({ error }) => {
   if (CombinedGraphQLErrors.is(error)) {
     const first = error.errors[0];
+    const unauthorized = first?.extensions?.code === "UNAUTHORIZED";
     const message = first?.message ?? "Something went wrong while processing the request";
-
     showErrorToast(message);
+    if (unauthorized) {
+      setTimeout(() => {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+      }, 1000);
+      return;
+    }
+
     return;
   }
 

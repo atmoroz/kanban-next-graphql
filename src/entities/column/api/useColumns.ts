@@ -21,7 +21,7 @@ export function useColumns(boardId: string | null): UseColumnsResult {
   );
 
   const columns = useMemo(
-    () => (data?.columns ?? []).sort((a, b) => a.position - b.position),
+    () => [...(data?.columns ?? [])].sort((a, b) => a.position - b.position),
     [data],
   );
 

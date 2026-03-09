@@ -50,8 +50,6 @@ export function useCreateColumn({
         },
         update(cache, { data }) {
           const created = data?.createColumn;
-          const columnId = created?.id ?? optimisticId;
-
           try {
             const existing = cache.readQuery<ColumnsQuery, ColumnsQueryVariables>({
               query: ColumnsDocument,

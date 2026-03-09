@@ -12,12 +12,11 @@ export function CreateColumnButton({ onClick }: CreateColumnButtonProps) {
     <Button
       type="button"
       variant="secondary"
-      className="h-9 min-w-80 justify-start border-dashed text-muted-foreground hover:text-foreground"
+      className="h-9 px-4 w-fit justify-start cursor-pointer border-dashed text-muted-foreground hover:text-foreground"
       onClick={onClick}
     >
       <Plus className="mr-2 size-4" />
-      Add column
+      Create column
     </Button>
   );
 }
-
