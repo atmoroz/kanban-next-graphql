@@ -1,0 +1,12 @@
+mutation UpdateColumn($id: ID!, $title: String!) {
+  updateColumn(id: $id, title: $title) {
+    id
+    boardId
+    title
+    position
+    statusId
+    createdAt
+    updatedAt
+  }
+}
+

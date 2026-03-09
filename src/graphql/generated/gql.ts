@@ -14,19 +14,31 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
-    "mutation CreateBoard($title: String!, $description: String, $visibility: BoardVisibility!) {\n  createBoard(title: $title, description: $description, visibility: $visibility) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}\n\nmutation UpdateBoard($id: ID!, $title: String, $description: String, $visibility: BoardVisibility) {\n  updateBoard(\n    id: $id\n    title: $title\n    description: $description\n    visibility: $visibility\n  ) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}\n\nmutation DeleteBoard($id: ID!) {\n  deleteBoard(id: $id)\n}": typeof types.CreateBoardDocument,
+    "mutation CreateBoard($title: String!, $description: String, $visibility: BoardVisibility!) {\n  createBoard(title: $title, description: $description, visibility: $visibility) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}": typeof types.CreateBoardDocument,
+    "mutation CreateColumn($boardId: ID!, $title: String!) {\n  createColumn(boardId: $boardId, title: $title) {\n    id\n    boardId\n    title\n    position\n    statusId\n    createdAt\n    updatedAt\n  }\n}": typeof types.CreateColumnDocument,
+    "mutation DeleteBoard($id: ID!) {\n  deleteBoard(id: $id)\n}": typeof types.DeleteBoardDocument,
+    "mutation DeleteColumn($id: ID!) {\n  deleteColumn(id: $id)\n}": typeof types.DeleteColumnDocument,
     "mutation Login($email: String!, $password: String!) {\n  login(email: $email, password: $password) {\n    token\n    user {\n      id\n      email\n      name\n    }\n  }\n}": typeof types.LoginDocument,
     "mutation Register($email: String!, $password: String!, $name: String) {\n  register(email: $email, password: $password, name: $name) {\n    token\n    user {\n      id\n      email\n      name\n      createdAt\n    }\n  }\n}": typeof types.RegisterDocument,
+    "mutation UpdateBoard($id: ID!, $title: String, $description: String, $visibility: BoardVisibility) {\n  updateBoard(\n    id: $id\n    title: $title\n    description: $description\n    visibility: $visibility\n  ) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}": typeof types.UpdateBoardDocument,
+    "mutation UpdateColumn($id: ID!, $title: String!) {\n  updateColumn(id: $id, title: $title) {\n    id\n    boardId\n    title\n    position\n    statusId\n    createdAt\n    updatedAt\n  }\n}": typeof types.UpdateColumnDocument,
     "query Board($id: ID!) {\n  board(id: $id) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}": typeof types.BoardDocument,
     "query Boards($first: Int, $after: String, $last: Int, $before: String, $visibility: BoardVisibility, $sortBy: BoardSortBy, $sortOrder: SortOrder) {\n  boards(\n    first: $first\n    after: $after\n    last: $last\n    before: $before\n    visibility: $visibility\n    sortBy: $sortBy\n    sortOrder: $sortOrder\n  ) {\n    edges {\n      cursor\n      node {\n        id\n        title\n        description\n        visibility\n        createdAt\n        updatedAt\n      }\n    }\n    pageInfo {\n      hasNextPage\n      hasPreviousPage\n      startCursor\n      endCursor\n    }\n  }\n}": typeof types.BoardsDocument,
+    "query Columns($boardId: ID!) {\n  columns(boardId: $boardId) {\n    id\n    boardId\n    title\n    position\n    statusId\n    createdAt\n    updatedAt\n  }\n}": typeof types.ColumnsDocument,
     "query Me {\n  me {\n    id\n    email\n    name\n    createdAt\n  }\n}": typeof types.MeDocument,
 };
 const documents: Documents = {
-    "mutation CreateBoard($title: String!, $description: String, $visibility: BoardVisibility!) {\n  createBoard(title: $title, description: $description, visibility: $visibility) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}\n\nmutation UpdateBoard($id: ID!, $title: String, $description: String, $visibility: BoardVisibility) {\n  updateBoard(\n    id: $id\n    title: $title\n    description: $description\n    visibility: $visibility\n  ) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}\n\nmutation DeleteBoard($id: ID!) {\n  deleteBoard(id: $id)\n}": types.CreateBoardDocument,
+    "mutation CreateBoard($title: String!, $description: String, $visibility: BoardVisibility!) {\n  createBoard(title: $title, description: $description, visibility: $visibility) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}": types.CreateBoardDocument,
+    "mutation CreateColumn($boardId: ID!, $title: String!) {\n  createColumn(boardId: $boardId, title: $title) {\n    id\n    boardId\n    title\n    position\n    statusId\n    createdAt\n    updatedAt\n  }\n}": types.CreateColumnDocument,
+    "mutation DeleteBoard($id: ID!) {\n  deleteBoard(id: $id)\n}": types.DeleteBoardDocument,
+    "mutation DeleteColumn($id: ID!) {\n  deleteColumn(id: $id)\n}": types.DeleteColumnDocument,
     "mutation Login($email: String!, $password: String!) {\n  login(email: $email, password: $password) {\n    token\n    user {\n      id\n      email\n      name\n    }\n  }\n}": types.LoginDocument,
     "mutation Register($email: String!, $password: String!, $name: String) {\n  register(email: $email, password: $password, name: $name) {\n    token\n    user {\n      id\n      email\n      name\n      createdAt\n    }\n  }\n}": types.RegisterDocument,
+    "mutation UpdateBoard($id: ID!, $title: String, $description: String, $visibility: BoardVisibility) {\n  updateBoard(\n    id: $id\n    title: $title\n    description: $description\n    visibility: $visibility\n  ) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}": types.UpdateBoardDocument,
+    "mutation UpdateColumn($id: ID!, $title: String!) {\n  updateColumn(id: $id, title: $title) {\n    id\n    boardId\n    title\n    position\n    statusId\n    createdAt\n    updatedAt\n  }\n}": types.UpdateColumnDocument,
     "query Board($id: ID!) {\n  board(id: $id) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}": types.BoardDocument,
     "query Boards($first: Int, $after: String, $last: Int, $before: String, $visibility: BoardVisibility, $sortBy: BoardSortBy, $sortOrder: SortOrder) {\n  boards(\n    first: $first\n    after: $after\n    last: $last\n    before: $before\n    visibility: $visibility\n    sortBy: $sortBy\n    sortOrder: $sortOrder\n  ) {\n    edges {\n      cursor\n      node {\n        id\n        title\n        description\n        visibility\n        createdAt\n        updatedAt\n      }\n    }\n    pageInfo {\n      hasNextPage\n      hasPreviousPage\n      startCursor\n      endCursor\n    }\n  }\n}": types.BoardsDocument,
+    "query Columns($boardId: ID!) {\n  columns(boardId: $boardId) {\n    id\n    boardId\n    title\n    position\n    statusId\n    createdAt\n    updatedAt\n  }\n}": types.ColumnsDocument,
     "query Me {\n  me {\n    id\n    email\n    name\n    createdAt\n  }\n}": types.MeDocument,
 };
 
@@ -47,7 +59,19 @@ export function gql(source: string): unknown;
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "mutation CreateBoard($title: String!, $description: String, $visibility: BoardVisibility!) {\n  createBoard(title: $title, description: $description, visibility: $visibility) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}\n\nmutation UpdateBoard($id: ID!, $title: String, $description: String, $visibility: BoardVisibility) {\n  updateBoard(\n    id: $id\n    title: $title\n    description: $description\n    visibility: $visibility\n  ) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}\n\nmutation DeleteBoard($id: ID!) {\n  deleteBoard(id: $id)\n}"): (typeof documents)["mutation CreateBoard($title: String!, $description: String, $visibility: BoardVisibility!) {\n  createBoard(title: $title, description: $description, visibility: $visibility) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}\n\nmutation UpdateBoard($id: ID!, $title: String, $description: String, $visibility: BoardVisibility) {\n  updateBoard(\n    id: $id\n    title: $title\n    description: $description\n    visibility: $visibility\n  ) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}\n\nmutation DeleteBoard($id: ID!) {\n  deleteBoard(id: $id)\n}"];
+export function gql(source: "mutation CreateBoard($title: String!, $description: String, $visibility: BoardVisibility!) {\n  createBoard(title: $title, description: $description, visibility: $visibility) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}"): (typeof documents)["mutation CreateBoard($title: String!, $description: String, $visibility: BoardVisibility!) {\n  createBoard(title: $title, description: $description, visibility: $visibility) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "mutation CreateColumn($boardId: ID!, $title: String!) {\n  createColumn(boardId: $boardId, title: $title) {\n    id\n    boardId\n    title\n    position\n    statusId\n    createdAt\n    updatedAt\n  }\n}"): (typeof documents)["mutation CreateColumn($boardId: ID!, $title: String!) {\n  createColumn(boardId: $boardId, title: $title) {\n    id\n    boardId\n    title\n    position\n    statusId\n    createdAt\n    updatedAt\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "mutation DeleteBoard($id: ID!) {\n  deleteBoard(id: $id)\n}"): (typeof documents)["mutation DeleteBoard($id: ID!) {\n  deleteBoard(id: $id)\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "mutation DeleteColumn($id: ID!) {\n  deleteColumn(id: $id)\n}"): (typeof documents)["mutation DeleteColumn($id: ID!) {\n  deleteColumn(id: $id)\n}"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -59,11 +83,23 @@ export function gql(source: "mutation Register($email: String!, $password: Strin
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function gql(source: "mutation UpdateBoard($id: ID!, $title: String, $description: String, $visibility: BoardVisibility) {\n  updateBoard(\n    id: $id\n    title: $title\n    description: $description\n    visibility: $visibility\n  ) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}"): (typeof documents)["mutation UpdateBoard($id: ID!, $title: String, $description: String, $visibility: BoardVisibility) {\n  updateBoard(\n    id: $id\n    title: $title\n    description: $description\n    visibility: $visibility\n  ) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "mutation UpdateColumn($id: ID!, $title: String!) {\n  updateColumn(id: $id, title: $title) {\n    id\n    boardId\n    title\n    position\n    statusId\n    createdAt\n    updatedAt\n  }\n}"): (typeof documents)["mutation UpdateColumn($id: ID!, $title: String!) {\n  updateColumn(id: $id, title: $title) {\n    id\n    boardId\n    title\n    position\n    statusId\n    createdAt\n    updatedAt\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function gql(source: "query Board($id: ID!) {\n  board(id: $id) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}"): (typeof documents)["query Board($id: ID!) {\n  board(id: $id) {\n    id\n    title\n    description\n    visibility\n    createdAt\n    updatedAt\n  }\n}"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "query Boards($first: Int, $after: String, $last: Int, $before: String, $visibility: BoardVisibility, $sortBy: BoardSortBy, $sortOrder: SortOrder) {\n  boards(\n    first: $first\n    after: $after\n    last: $last\n    before: $before\n    visibility: $visibility\n    sortBy: $sortBy\n    sortOrder: $sortOrder\n  ) {\n    edges {\n      cursor\n      node {\n        id\n        title\n        description\n        visibility\n        createdAt\n        updatedAt\n      }\n    }\n    pageInfo {\n      hasNextPage\n      hasPreviousPage\n      startCursor\n      endCursor\n    }\n  }\n}"): (typeof documents)["query Boards($first: Int, $after: String, $last: Int, $before: String, $visibility: BoardVisibility, $sortBy: BoardSortBy, $sortOrder: SortOrder) {\n  boards(\n    first: $first\n    after: $after\n    last: $last\n    before: $before\n    visibility: $visibility\n    sortBy: $sortBy\n    sortOrder: $sortOrder\n  ) {\n    edges {\n      cursor\n      node {\n        id\n        title\n        description\n        visibility\n        createdAt\n        updatedAt\n      }\n    }\n    pageInfo {\n      hasNextPage\n      hasPreviousPage\n      startCursor\n      endCursor\n    }\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "query Columns($boardId: ID!) {\n  columns(boardId: $boardId) {\n    id\n    boardId\n    title\n    position\n    statusId\n    createdAt\n    updatedAt\n  }\n}"): (typeof documents)["query Columns($boardId: ID!) {\n  columns(boardId: $boardId) {\n    id\n    boardId\n    title\n    position\n    statusId\n    createdAt\n    updatedAt\n  }\n}"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
