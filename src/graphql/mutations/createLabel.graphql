@@ -1,0 +1,9 @@
+mutation CreateLabel($boardId: ID!, $name: String!, $color: String) {
+  createLabel(boardId: $boardId, name: $name, color: $color) {
+    id
+    boardId
+    name
+    color
+  }
+}
+

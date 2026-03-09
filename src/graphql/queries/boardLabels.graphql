@@ -1,0 +1,9 @@
+query BoardLabels($boardId: ID!) {
+  boardLabels(boardId: $boardId) {
+    id
+    boardId
+    name
+    color
+  }
+}
+
