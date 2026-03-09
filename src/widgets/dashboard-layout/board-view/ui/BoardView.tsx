@@ -1,4 +1,5 @@
 import { SidebarBoard } from "@/entities/board";
+import { ColumnsContainer } from "./ColumnsContainer";
 
 type BoardViewProps = {
   selectedBoard: SidebarBoard | null;
@@ -26,16 +27,12 @@ export function BoardView({ selectedBoard, isLoading }: BoardViewProps) {
           </div>
 
           <div className="flex-1 overflow-auto px-6 py-6 text-sm text-muted-foreground">
-            <div className="flex h-full items-center justify-center">
-              {isLoading ? (
+            {isLoading && !selectedBoard && (
+              <div className="flex h-full items-center justify-center">
                 <p>Loading board data...</p>
-              ) : (
-                <p>
-                  Columns and tasks will appear here as we implement boards and tasks in
-                  the next epics.
-                </p>
-              )}
-            </div>
+              </div>
+            )}
+            {selectedBoard && <ColumnsContainer boardId={selectedBoard.id} />}
           </div>
         </>
       ) : (

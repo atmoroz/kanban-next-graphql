@@ -1,0 +1,15 @@
+mutation CreateColumn(
+  $boardId: ID!
+  $title: String!
+) {
+  createColumn(boardId: $boardId, title: $title) {
+    id
+    boardId
+    title
+    position
+    statusId
+    createdAt
+    updatedAt
+  }
+}
+
