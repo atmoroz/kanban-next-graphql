@@ -1,0 +1,191 @@
+# EPIC-06.5 — Labels Management
+
+## Goal
+
+Implement full label management for boards.
+
+Labels allow users to categorize tasks with color-coded tags.
+
+Users must be able to:
+
+- fetch board labels
+- create labels
+- update labels
+- delete labels
+
+Labels are later used in tasks for tagging and filtering.
+
+---
+
+## GraphQL Operations Used
+
+### Queries
+
+boardLabels(boardId)
+
+Returns all labels belonging to a board.
+
+### Mutations
+
+createLabel  
+updateLabel  
+deleteLabel
+
+---
+
+## Tasks
+
+### 1. Fetch Labels
+
+Load labels for the active board.
+
+Requirements:
+
+- use `boardLabels(boardId)` query
+- fetch labels when board changes
+- store labels in Apollo cache
+
+---
+
+### 2. Render Labels
+
+Labels must display:
+
+- label name
+- color indicator
+
+Labels will appear:
+
+- inside task cards
+- inside task details
+- inside label selector
+
+---
+
+### 3. Create Label
+
+Allow users to create a new label.
+
+UI requirements:
+
+- label creation modal
+- fields:
+  - name
+  - color
+
+Mutation used:
+
+createLabel
+
+---
+
+### 4. Update Label
+
+Allow editing label metadata.
+
+Editable fields:
+
+- name
+- color
+
+Mutation used:
+
+updateLabel
+
+---
+
+### 5. Delete Label
+
+Allow removing labels from the board.
+
+Mutation used:
+
+deleteLabel
+
+If label is removed:
+
+- tasks referencing the label must update automatically via Apollo cache.
+
+---
+
+### 6. Optimistic Updates
+
+For create/update/delete:
+
+- apply optimistic updates
+- rollback on mutation failure
+
+---
+
+## Files & Folders to Create
+
+### Entities
+
+src/entities/label/
+ ├── api/
+ │   ├── useLabels.ts
+ │   ├── createLabel.ts
+ │   ├── updateLabel.ts
+ │   └── deleteLabel.ts
+ │
+ ├── model/
+ │   └── label.types.ts
+ │
+ └── ui/
+     └── LabelBadge.tsx
+
+---
+
+### Features
+
+src/features/create-label/
+ └── ui/CreateLabelModal.tsx
+
+src/features/update-label/
+ └── ui/EditLabelModal.tsx
+
+src/features/delete-label/
+ └── model/useDeleteLabel.ts
+
+---
+
+### GraphQL
+
+src/graphql/queries/boardLabels.graphql
+
+src/graphql/mutations/createLabel.graphql  
+src/graphql/mutations/updateLabel.graphql  
+src/graphql/mutations/deleteLabel.graphql
+
+---
+
+## Error Handling
+
+All errors must be handled via the global error system implemented in **EPIC-03.5**.
+
+Behavior:
+
+- show error toast
+- rollback optimistic updates
+
+---
+
+## Success Feedback
+
+Optional success messages:
+
+- Label created
+- Label updated
+- Label deleted
+
+---
+
+## Acceptance Criteria
+
+- Labels load correctly for the selected board.
+- Users can create labels.
+- Users can edit labels.
+- Users can delete labels.
+- Labels display correctly in UI.
+- Optimistic updates work correctly.
+- Apollo cache updates without full refetch.
