@@ -1,0 +1,10 @@
+mutation MoveTask($id: ID!, $columnId: ID!, $position: Int) {
+  moveTask(id: $id, columnId: $columnId, position: $position) {
+    id
+    columnId
+    position
+    statusId
+    updatedAt
+  }
+}
+

@@ -5,7 +5,7 @@ import Link from "next/link";
 export function Footer() {
   return (
     <footer className="border-t border-border bg-background">
-      <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-6">
+      <div className="mx-auto flex h-16 w-full  items-center justify-between px-6">
         <div className="text-sm text-muted-foreground">
           TaskFlow © {new Date().getFullYear()}
         </div>

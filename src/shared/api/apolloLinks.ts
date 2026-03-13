@@ -7,8 +7,8 @@ import { createClient } from "graphql-ws";
 import { showErrorToast, showInfoToast } from "@/shared/lib/toast";
 
 function getHttpUri(): string {
-  // Все HTTP-запросы идут через edge-proxy /api/graphql,
-  // который сам добавляет Authorization из httpOnly cookie.
+  // All HTTP requests go through the edge proxy /api/graphql,
+  // which adds Authorization from the httpOnly cookie.
   return "/api/graphql";
 }
 

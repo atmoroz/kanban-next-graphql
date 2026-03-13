@@ -1,0 +1,26 @@
+query TasksByColumn($columnId: ID!, $first: Int) {
+  tasksByColumn(columnId: $columnId, first: $first) {
+    edges {
+      node {
+        id
+        columnId
+        title
+        description
+        priority
+        statusId
+        labelIds
+        dueDate
+        assigneeId
+        position
+        createdAt
+        updatedAt
+      }
+      cursor
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
