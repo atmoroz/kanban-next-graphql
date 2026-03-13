@@ -11,6 +11,18 @@ function createApolloClient() {
       typePolicies: {
         Query: {
           fields: {
+            taskActivities: {
+              keyArgs: ["taskId"],
+              merge(existing, incoming) {
+                const existingEdges = existing?.edges ?? [];
+                const incomingEdges = incoming?.edges ?? [];
+
+                return {
+                  ...incoming,
+                  edges: [...existingEdges, ...incomingEdges],
+                };
+              },
+            },
             // Add keyArgs and merge for paginated fields (boards, tasksByColumn, etc.) when needed.
           },
         },

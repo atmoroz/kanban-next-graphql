@@ -8,13 +8,14 @@ const SIZE_CLASSES = {
   sm: "max-w-sm",
   md: "max-w-md",
   lg: "max-w-lg",
+  xl: "max-w-xl",
 } as const;
 
 type ModalProps = {
   open: boolean;
   onClose: () => void;
   children: ReactNode;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 };
 const FOCUSABLE_SELECTOR =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -30,6 +31,7 @@ export function Modal({ open, onClose, children, size = "md" }: ModalProps) {
       if (e.key !== "Tab") return;
       const el = containerRef.current;
       if (!el) return;
+
       const focusable = el.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
       if (!focusable.length) return;
       const first = focusable[0];
@@ -50,20 +52,21 @@ export function Modal({ open, onClose, children, size = "md" }: ModalProps) {
   );
 
   useEffect(() => {
-    // if (!open) {
-    //   queueMicrotask(() => setEntered(false));
-    //   return;
-    // }
-    // queueMicrotask(() => setEntered(false));
+    if (!open) return;
+
     const previouslyFocused = document.activeElement as HTMLElement | null;
+
     const focusTimer = requestAnimationFrame(() => {
       containerRef.current?.focus();
     });
+
     const enterTimer = requestAnimationFrame(() => {
       setEntered(true);
     });
+
     document.addEventListener("keydown", handleKeyDown);
     document.body.style.overflow = "hidden";
+
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
@@ -71,7 +74,7 @@ export function Modal({ open, onClose, children, size = "md" }: ModalProps) {
       cancelAnimationFrame(focusTimer);
       cancelAnimationFrame(enterTimer);
     };
-  }, [open, handleKeyDown]);
+  }, [open]);
 
   if (!open) return null;
 

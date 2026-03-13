@@ -1,0 +1,33 @@
+mutation CreateTask(
+  $columnId: ID!
+  $title: String!
+  $description: String
+  $priority: TaskPriority!
+  $labelIds: [ID!]
+  $dueDate: DateTime
+  $assigneeId: ID
+) {
+  createTask(
+    columnId: $columnId
+    title: $title
+    description: $description
+    priority: $priority
+    labelIds: $labelIds
+    dueDate: $dueDate
+    assigneeId: $assigneeId
+  ) {
+    id
+    columnId
+    title
+    description
+    priority
+    statusId
+    labelIds
+    dueDate
+    assigneeId
+    position
+    createdAt
+    updatedAt
+  }
+}
+

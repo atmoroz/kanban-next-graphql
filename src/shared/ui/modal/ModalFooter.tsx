@@ -10,8 +10,8 @@ type ModalFooterProps = {
   cancelText?: string;
   showCancel?: boolean;
   isLoading?: boolean;
-  /** Вариант кнопки подтверждения (например "destructive" для удаления) */
   okVariant?: "primary" | "secondary" | "destructive";
+  isOkDisabled?: boolean;
 };
 
 export function ModalFooter({
@@ -22,6 +22,7 @@ export function ModalFooter({
   showCancel = true,
   isLoading = false,
   okVariant = "primary",
+  isOkDisabled = false,
 }: ModalFooterProps) {
   return (
     <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
@@ -36,7 +37,7 @@ export function ModalFooter({
           variant={okVariant}
           onClick={onOk}
           className="px-4"
-          disabled={isLoading}
+          disabled={isLoading || isOkDisabled}
         >
           {isLoading ? (
             <>

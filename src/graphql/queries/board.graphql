@@ -3,6 +3,17 @@ query Board($id: ID!) {
     id
     title
     description
+    permissions {
+      createTask
+      updateTask
+      deleteTask
+      moveCard
+      moveColumn
+      createColumn
+      manageLabels
+      inviteMember
+      manageBoardMembers
+    }
     visibility
     createdAt
     updatedAt
