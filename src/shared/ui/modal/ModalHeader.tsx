@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
+import { Button } from "@/shared/ui/button";
 
 type ModalHeaderProps = {
   title: string;
@@ -13,18 +14,17 @@ export function ModalHeader({ title, onClose }: ModalHeaderProps) {
     <div className="flex items-center justify-between border-b border-border px-6 py-4">
       <h2 className="text-lg font-semibold">{title}</h2>
       {onClose && (
-        <button
+        <Button
           type="button"
           onClick={onClose}
           className={cn(
             "inline-flex h-8 w-8 items-center justify-center rounded-md",
-            "text-muted-foreground hover:bg-muted hover:text-foreground",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            "bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground",
           )}
           aria-label="Close"
         >
           <X className="size-4" />
-        </button>
+        </Button>
       )}
     </div>
   );

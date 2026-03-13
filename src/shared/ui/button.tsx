@@ -1,13 +1,15 @@
 import * as React from "react";
 import { cn } from "@/shared/lib/cn";
 type ButtonProps = React.ComponentProps<"button"> & {
-  variant?: "primary" | "secondary" | "destructive";
+  variant?: "primary" | "secondary" | "ghost" | "destructive";
 };
 
-const VARIANTS = {
+const VARIANTS: Record<NonNullable<ButtonProps["variant"]>, string> = {
   primary: "bg-primary text-primary-foreground hover:bg-primary/90",
   secondary: "border border-border bg-transparent hover:bg-muted text-foreground",
-  destructive: "bg-destructive text-background hover:bg-destructive/90",
+  ghost: "bg-transparent text-foreground hover:bg-muted",
+  destructive:
+    "bg-destructive text-background hover:bg-[color-mix(in_oklab,var(--destructive)_80%,transparent)]",
 };
 
 function Button({

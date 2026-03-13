@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
+import { Button } from "@/shared/ui/button";
 import type { SidebarBoard } from "../model/board.types";
 
 type BoardSidebarItemProps = {
@@ -66,8 +67,9 @@ export function BoardSidebarItem({
         )}
         {board.title}
       </span>
-      <button
+      <Button
         type="button"
+        variant="secondary"
         onClick={(e) => {
           e.stopPropagation();
           onOpenMenu(isMenuOpen ? null : board.id);
@@ -79,7 +81,7 @@ export function BoardSidebarItem({
         aria-label="Board actions"
       >
         <MoreHorizontal className="size-4" aria-hidden="true" />
-      </button>
+      </Button>
 
       {isMenuOpen && (
         <div
@@ -95,14 +97,15 @@ export function BoardSidebarItem({
             "
           onClick={(e) => e.stopPropagation()}
         >
-          <button
+          <Button
             type="button"
+            variant="ghost"
             className="flex w-full items-center gap-2
               rounded-md px-3 py-2
               text-sm
               hover:bg-muted
               transition-colors
-              text-foreground"
+              text-foreground justify-start h-auto"
             onClick={() => {
               onOpenMenu(null);
               onEdit?.(board);
@@ -110,10 +113,11 @@ export function BoardSidebarItem({
           >
             <Pencil className="size-3.5" aria-hidden="true" />
             <span>Edit</span>
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className="flex w-full rounded-md items-center gap-2 px-3 py-2 text-left text-destructive hover:bg-destructive/10"
+            variant="destructive"
+            className="flex w-full rounded-md items-center gap-2 px-3 py-2 text-left justify-start h-auto"
             onClick={() => {
               onOpenMenu(null);
               onDelete?.(board);
@@ -121,7 +125,7 @@ export function BoardSidebarItem({
           >
             <Trash2 className="size-3.5" aria-hidden="true" />
             <span>Delete</span>
-          </button>
+          </Button>
         </div>
       )}
     </div>

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { MoreHorizontal, Pencil, MoveRight, Trash2 } from "lucide-react";
 import { Card } from "@/shared/ui/card";
+import { Button } from "@/shared/ui/button";
 import type { TaskPriority } from "@/graphql/generated/graphql";
 import type { BoardTask } from "../model/task.types";
 import type { BoardLabel } from "@/entities/label";
@@ -176,8 +177,9 @@ export function TaskCard({
           : undefined
       }
     >
-      <button
+      <Button
         type="button"
+        variant="secondary"
         className="absolute right-1.5 top-1.5 inline-flex h-7 w-7 items-center justify-center rounded-full bg-background/80 text-xs text-muted-foreground hover:bg-muted"
         onClick={(event) => {
           event.stopPropagation();
@@ -186,7 +188,7 @@ export function TaskCard({
         aria-label="Task actions"
       >
         <MoreHorizontal className="size-4" aria-hidden="true" />
-      </button>
+      </Button>
 
       <div className="pr-7">
         <div className="text-sm font-medium leading-snug text-foreground line-clamp-2">
@@ -237,9 +239,10 @@ export function TaskCard({
           }}
         >
           {onEdit && (
-            <button
+            <Button
               type="button"
-              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-foreground transition-colors hover:bg-muted"
+              variant="ghost"
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left justify-start h-auto text-foreground hover:bg-muted"
               onMouseEnter={() => {
                 setIsMoveMenuOpen(false);
               }}
@@ -250,7 +253,7 @@ export function TaskCard({
             >
               <Pencil className="size-3.5" aria-hidden="true" />
               <span>Edit</span>
-            </button>
+            </Button>
           )}
           {onMoveTo && (
             <div
@@ -276,14 +279,15 @@ export function TaskCard({
                 }
               }}
             >
-              <button
+              <Button
                 type="button"
-                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-foreground transition-colors hover:bg-muted"
+                variant="ghost"
+                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left justify-start h-auto text-foreground hover:bg-muted"
                 disabled={isMoveDisabled || !moveTargets || moveTargets.length === 0}
               >
                 <MoveRight className="size-3.5" aria-hidden="true" />
                 <span>Move</span>
-              </button>
+              </Button>
               {!isMoveDisabled &&
                 moveTargets &&
                 moveTargets.length > 0 &&
@@ -294,10 +298,11 @@ export function TaskCard({
                     }`}
                   >
                     {moveTargets.map((target) => (
-                      <button
+                      <Button
                         key={target.id}
                         type="button"
-                        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-foreground transition-colors hover:bg-muted"
+                        variant="ghost"
+                        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left justify-start h-auto text-foreground hover:bg-muted"
                         onClick={() => {
                           setIsMoveMenuOpen(false);
                           setIsMenuOpen(false);
@@ -305,16 +310,17 @@ export function TaskCard({
                         }}
                       >
                         <span>{target.label}</span>
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 )}
             </div>
           )}
           {onDelete && (
-            <button
+            <Button
               type="button"
-              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-destructive transition-colors hover:bg-destructive/10"
+              variant="destructive"
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left justify-start h-auto"
               onMouseEnter={() => {
                 setIsMoveMenuOpen(false);
               }}
@@ -325,7 +331,7 @@ export function TaskCard({
             >
               <Trash2 className="size-3.5" aria-hidden="true" />
               <span>Delete</span>
-            </button>
+            </Button>
           )}
         </div>
       )}
