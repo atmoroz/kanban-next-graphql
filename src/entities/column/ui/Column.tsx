@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useDrop } from "react-dnd";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
+import { Button } from "@/shared/ui/button";
 import type { BoardColumn } from "../model/column.types";
 import { TasksList } from "@/widgets/dashboard-layout/board-view/ui/TasksList";
 import { useTasksByColumn, type BoardTask } from "@/entities/task";
@@ -110,14 +111,15 @@ export function Column({
             {tasksCount ?? tasks.length}
           </span>
         </div>
-        <button
+        <Button
           type="button"
+          variant="secondary"
           className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-background/80 text-xs text-muted-foreground hover:bg-muted"
           onClick={() => onOpenMenu(isMenuOpen ? null : column.id)}
           aria-label="Column actions"
         >
           <MoreHorizontal className="size-4" aria-hidden="true" />
-        </button>
+        </Button>
       </header>
 
       <div className="relative flex-1 space-y-3  px-4 text-sm text-muted-foreground">
@@ -154,9 +156,10 @@ export function Column({
           className="absolute right-2 top-10 z-30 min-w-[160px] rounded-lg border border-border bg-popover p-1 text-sm shadow-lg"
           onClick={(event) => event.stopPropagation()}
         >
-          <button
+          <Button
             type="button"
-            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-foreground transition-colors hover:bg-muted"
+            variant="ghost"
+            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left justify-start h-auto text-foreground hover:bg-muted"
             onClick={() => {
               onOpenMenu(null);
               onEdit?.(column);
@@ -164,10 +167,11 @@ export function Column({
           >
             <Pencil className="size-3.5" aria-hidden="true" />
             <span>Edit</span>
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-destructive transition-colors hover:bg-destructive/10"
+            variant="destructive"
+            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left justify-start h-auto"
             onClick={() => {
               onOpenMenu(null);
               onDelete?.(column);
@@ -175,7 +179,7 @@ export function Column({
           >
             <Trash2 className="size-3.5" aria-hidden="true" />
             <span>Delete</span>
-          </button>
+          </Button>
         </div>
       )}
     </section>

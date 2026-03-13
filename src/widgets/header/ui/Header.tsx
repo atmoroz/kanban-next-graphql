@@ -7,6 +7,7 @@ import { useLogout } from "@/features/auth/logout";
 import { cn } from "@/shared/lib/cn";
 import { useTheme } from "@/shared/lib/useTheme";
 import { useUser } from "@/shared/providers/auth-provider";
+import { Button } from "@/shared/ui/button";
 
 export function Header() {
   const user = useUser();
@@ -69,25 +70,27 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button
+          <Button
             type="button"
+            variant="secondary"
             onClick={toggleTheme}
             className="relative inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
             aria-label="Toggle theme"
           >
             <Sun className="size-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute size-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          </button>
+          </Button>
 
           {user ? (
             <div className="relative" ref={menuRef}>
-              <button
+              <Button
                 type="button"
+                variant="secondary"
                 onClick={() => setMenuOpen((o) => !o)}
                 className="relative flex size-9 items-center justify-center overflow-hidden rounded-full bg-muted text-sm font-medium text-muted-foreground hover:bg-accent"
               >
                 {initials}
-              </button>
+              </Button>
               {menuOpen && (
                 <div className="absolute right-0 top-full z-50 mt-1 min-w-56 origin-top-right rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md">
                   <div className="flex flex-col gap-1 px-2 py-2">
@@ -106,13 +109,14 @@ export function Header() {
                   >
                     Profile
                   </Link>
-                  <button
+                  <Button
                     type="button"
-                    className="w-full rounded-sm px-2 py-1.5 text-left text-sm outline-none hover:bg-accent hover:text-accent-foreground"
+                    variant="ghost"
+                    className="w-full rounded-sm px-2 py-1.5 text-left justify-start h-auto text-sm outline-none hover:bg-accent hover:text-accent-foreground"
                     onClick={handleLogout}
                   >
                     Logout
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>

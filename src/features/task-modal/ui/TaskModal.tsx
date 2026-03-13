@@ -7,6 +7,7 @@ import { TaskActivityList, useTaskActivities } from "@/features/task-activity";
 import { isTaskFormPristine } from "@/features/task-form/model/is-task-form-pristine";
 import { cn } from "@/shared/lib/cn";
 import { Input } from "@/shared/ui/input";
+import { Select } from "@/shared/ui/select";
 import { Label } from "@/shared/ui/label";
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "@/shared/ui/modal";
 import { ChevronDown } from "lucide-react";
@@ -197,9 +198,9 @@ export function TaskModal({
                     </p>
                   ) : (
                     <div className="relative">
-                      <select
+                      <Select
                         id="task-status"
-                        className=" appearance-none h-9 w-full capitalize rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:border-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="h-9 w-full appearance-none capitalize"
                         value={statusId}
                         onChange={(event) => setStatusId(event.target.value)}
                         disabled={!hasStatuses}
@@ -214,7 +215,7 @@ export function TaskModal({
                             {option.label}
                           </option>
                         ))}
-                      </select>
+                      </Select>
                       {hasStatuses && (
                         <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                       )}
@@ -225,9 +226,9 @@ export function TaskModal({
                 <div>
                   <Label htmlFor="task-priority">Priority</Label>
                   <div className="relative">
-                    <select
+                    <Select
                       id="task-priority"
-                      className="h-9 w-full appearance-none rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:border-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2"
+                      className="h-9 w-full appearance-none"
                       value={priority}
                       onChange={(event) =>
                         setPriority(event.target.value as TaskPriorityChoice)
@@ -236,13 +237,13 @@ export function TaskModal({
                       <option value="low">Low</option>
                       <option value="medium">Medium</option>
                       <option value="high">High</option>
-                    </select>
+                    </Select>
                     <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
                 </div>
 
                 <div>
-                  <Label>Labels</Label>
+                  <Label>Select Labels</Label>
                   {labels.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
                       {labels.map((label) => {
