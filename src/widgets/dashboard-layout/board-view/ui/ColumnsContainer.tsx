@@ -5,11 +5,11 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { Column, ColumnFormModal, useColumns, type BoardColumn } from "@/entities/column";
 import type { BoardTask } from "@/entities/task";
 import { useLabels } from "@/entities/label";
-import { CreateColumnButton } from "@/features/create-column";
+import { useBoardFilters, useIsBoardSearchMode } from "@/features/filters";
 import { useCreateColumn } from "@/features/create-column";
 import { useUpdateColumn } from "@/features/update-column";
 import { DeleteColumnConfirmModal } from "@/features/delete-column";
-import { CreateTaskButton, useCreateTask } from "@/features/create-task";
+import { useCreateTask } from "@/features/create-task";
 import { TaskModal, type TaskFormValues } from "@/features/task-modal";
 import { DeleteTaskConfirmModal } from "@/features/delete-task";
 import { useUpdateTask } from "@/features/update-task";
@@ -18,13 +18,17 @@ import { useMoveTask } from "@/features/move-task";
 import { TaskPriority } from "@/graphql/generated/graphql";
 import { areArraysEqual } from "@/shared/lib/array/are-arrays-equal";
 import { useState, useCallback } from "react";
+import { Toolbar } from "./Toolbar";
 
 type ColumnsContainerProps = {
   boardId: string;
 };
 
 export function ColumnsContainer({ boardId }: ColumnsContainerProps) {
-  const { columns, isLoading } = useColumns(boardId);
+  const isSearchMode = useIsBoardSearchMode();
+  const { searchQuery } = useBoardFilters();
+
+  const { columns } = useColumns(boardId);
   const { labels } = useLabels(boardId);
   const { createColumn, loading: createLoading } = useCreateColumn({ boardId });
   const { updateColumn, loading: updateLoading } = useUpdateColumn();
@@ -54,6 +58,7 @@ export function ColumnsContainer({ boardId }: ColumnsContainerProps) {
   const firstColumnId = columns[0]?.id ?? "";
   const { createTask, loading: createTaskLoading } = useCreateTask({
     columnId: firstColumnId,
+    boardId,
   });
   const { updateTask, loading: updateTaskLoading } = useUpdateTask();
   const { updateTaskLabels, loading: updateTaskLabelsLoading } = useUpdateTaskLabels();
@@ -79,11 +84,15 @@ export function ColumnsContainer({ boardId }: ColumnsContainerProps) {
     priority,
     labelIds,
     dueDate,
+    statusId,
+    columnId,
   }: TaskFormValues) => {
     if (!firstColumnId) return;
 
     await createTask({
       title,
+      statusId,
+      columnId,
       description,
       priority: mapPriority(priority),
       labelIds,
@@ -128,155 +137,129 @@ export function ColumnsContainer({ boardId }: ColumnsContainerProps) {
   };
 
   return (
-    <DndProvider backend={HTML5Backend}>
-      <div className="flex h-full flex-col gap-4">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-sm font-semibold text-muted-foreground">Columns</h2>
-          <div className="flex items-center gap-2">
-            <CreateColumnButton
-              onClick={() => {
-                setEditingColumn(null);
-                setCreateOpen(true);
-              }}
-            />
-            <CreateTaskButton
-              onClick={() => {
-                if (!firstColumnId) return;
-                setCreateTaskOpen(true);
-              }}
-              disabled={columns.length === 0 || createTaskLoading}
-            />
+    <>
+      <Toolbar
+        setEditingColumn={setEditingColumn}
+        setCreateOpen={setCreateOpen}
+        firstColumnId={firstColumnId}
+        setCreateTaskOpen={setCreateTaskOpen}
+        columns={columns}
+        createTaskLoading={createTaskLoading}
+      />
+      <DndProvider backend={HTML5Backend}>
+        <div className="flex h-full flex-col gap-4 overflow-auto">
+          <div className="flex flex-1 gap-4  pb-0">
+            {columns.map((column) => (
+              <Column
+                key={column.id}
+                column={column}
+                isMenuOpen={openMenuColumnId === column.id}
+                onOpenMenu={setOpenMenuColumnId}
+                onEdit={(col) => {
+                  setOpenMenuColumnId(null);
+                  setEditingColumn(col);
+                  setCreateOpen(true);
+                }}
+                onDelete={(col) => {
+                  setOpenMenuColumnId(null);
+                  setColumnToDelete(col);
+                }}
+                onTaskClick={(task) => {
+                  setEditingTask(task);
+                }}
+                onTaskEdit={(task) => {
+                  setEditingTask(task);
+                }}
+                onTaskDelete={(task) => {
+                  setTaskToDelete(task);
+                }}
+                allColumns={columns}
+                onTaskMoveTo={(task, targetColumnId, targetIndex) => {
+                  void moveTask({
+                    id: task.id,
+                    sourceColumnId: task.columnId,
+                    targetColumnId,
+                    position: targetIndex ?? undefined,
+                    boardId,
+                    searchQuery: searchQuery,
+                  });
+                }}
+                boardId={boardId}
+                isSearchMode={isSearchMode}
+                searchQuery={searchQuery}
+              />
+            ))}
           </div>
-        </div>
-        <div className="flex flex-1 gap-4  pb-0">
-          {isLoading && columns.length === 0 && (
-            <>
-              {Array.from({ length: 3 }).map((_, index) => (
-                <div
-                  key={`column-skeleton-${index}`}
-                  className="flex min-w-80 max-w-80 flex-col rounded-lg border border-dashed border-border/60 bg-muted/40 p-4"
-                >
-                  <div className="mb-4 flex items-center justify-between">
-                    <div className="h-4 w-32 animate-pulse rounded bg-muted" />
-                    <div className="h-5 w-8 animate-pulse rounded-full bg-muted" />
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-3 w-full animate-pulse rounded bg-muted" />
-                    <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
-                    <div className="h-3 w-2/3 animate-pulse rounded bg-muted" />
-                  </div>
-                </div>
-              ))}
-            </>
-          )}
 
-          {columns.map((column) => (
-            <Column
-              key={column.id}
-              column={column}
-              tasksCount={0}
-              isMenuOpen={openMenuColumnId === column.id}
-              onOpenMenu={setOpenMenuColumnId}
-              onEdit={(col) => {
-                setOpenMenuColumnId(null);
-                setEditingColumn(col);
-                setCreateOpen(true);
-              }}
-              onDelete={(col) => {
-                setOpenMenuColumnId(null);
-                setColumnToDelete(col);
-              }}
-              onTaskClick={(task) => {
-                setEditingTask(task);
-              }}
-              onTaskEdit={(task) => {
-                setEditingTask(task);
-              }}
-              onTaskDelete={(task) => {
-                setTaskToDelete(task);
-              }}
-              allColumns={columns}
-              onTaskMoveTo={(task, targetColumnId, targetIndex) => {
-                void moveTask({
-                  id: task.id,
-                  sourceColumnId: task.columnId,
-                  targetColumnId,
-                  position: targetIndex ?? undefined,
-                });
-              }}
-              boardId={boardId}
-            />
-          ))}
-        </div>
-
-        <ColumnFormModal
-          open={createOpen}
-          onClose={() => {
-            setCreateOpen(false);
-            setEditingColumn(null);
-          }}
-          mode={formMode}
-          initialTitle={editingColumn?.title ?? ""}
-          isLoading={formLoading}
-          onSubmit={handleSubmit}
-        />
-        <DeleteColumnConfirmModal
-          open={!!columnToDelete}
-          onClose={() => setColumnToDelete(null)}
-          column={columnToDelete}
-          boardId={boardId}
-        />
-        <DeleteTaskConfirmModal
-          open={!!taskToDelete}
-          onClose={() => {
-            if (taskToDelete && editingTask && editingTask.id === taskToDelete.id) {
-              setEditingTask(null);
-            }
-            setTaskToDelete(null);
-          }}
-          task={taskToDelete}
-        />
-        <TaskModal
-          open={createTaskOpen}
-          onClose={() => setCreateTaskOpen(false)}
-          isSubmitting={createTaskLoading}
-          statusOptions={columns.map((column) => ({
-            id: column.id,
-            label: column.title,
-          }))}
-          labels={labels}
-          initialStatusId={firstColumnId}
-          onSubmit={handleCreateTask}
-        />
-        {editingTask && (
+          <ColumnFormModal
+            open={createOpen}
+            onClose={() => {
+              setCreateOpen(false);
+              setEditingColumn(null);
+            }}
+            mode={formMode}
+            initialTitle={editingColumn?.title ?? ""}
+            isLoading={formLoading}
+            onSubmit={handleSubmit}
+          />
+          <DeleteColumnConfirmModal
+            open={!!columnToDelete}
+            onClose={() => setColumnToDelete(null)}
+            column={columnToDelete}
+            boardId={boardId}
+          />
+          <DeleteTaskConfirmModal
+            open={!!taskToDelete}
+            onClose={() => {
+              if (taskToDelete && editingTask && editingTask.id === taskToDelete.id) {
+                setEditingTask(null);
+              }
+              setTaskToDelete(null);
+            }}
+            task={taskToDelete}
+          />
           <TaskModal
-            open={!!editingTask}
-            onClose={() => setEditingTask(null)}
-            mode="update"
-            isSubmitting={labelsSubmitting}
+            open={createTaskOpen}
+            onClose={() => setCreateTaskOpen(false)}
+            isSubmitting={createTaskLoading}
             statusOptions={columns.map((column) => ({
               id: column.id,
               label: column.title,
             }))}
             labels={labels}
-            initialTitle={editingTask.title}
-            initialDescription={editingTask.description ?? ""}
-            initialStatusId={editingTask.columnId}
-            initialPriority={
-              editingTask.priority === TaskPriority.Low
-                ? "low"
-                : editingTask.priority === TaskPriority.High
-                  ? "high"
-                  : "medium"
-            }
-            initialLabelIds={editingTask.labelIds}
-            initialDueDate={editingTask.dueDate}
-            createdAt={editingTask.createdAt}
-            taskId={editingTask.id}
-            onSubmit={handleUpdateTask}
+            initialStatusId={firstColumnId}
+            onSubmit={handleCreateTask}
           />
-        )}
-      </div>
-    </DndProvider>
+          {editingTask && (
+            <TaskModal
+              open={!!editingTask}
+              onClose={() => setEditingTask(null)}
+              mode="update"
+              isSubmitting={labelsSubmitting}
+              statusOptions={columns.map((column) => ({
+                id: column.id,
+                label: column.title,
+              }))}
+              labels={labels}
+              initialTitle={editingTask.title}
+              initialDescription={editingTask.description ?? ""}
+              initialStatusId={editingTask.columnId}
+              initialPriority={
+                editingTask.priority === TaskPriority.Low
+                  ? "low"
+                  : editingTask.priority === TaskPriority.High
+                    ? "high"
+                    : "medium"
+              }
+              initialLabelIds={editingTask.labelIds}
+              initialDueDate={editingTask.dueDate}
+              createdAt={editingTask.createdAt}
+              taskId={editingTask.id}
+              onSubmit={handleUpdateTask}
+            />
+          )}
+        </div>
+      </DndProvider>
+    </>
   );
 }

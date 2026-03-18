@@ -5,7 +5,7 @@ import { Button } from "@/shared/ui/button";
 
 type CreateBoardButtonProps = {
   className?: string;
-  /** Вызывается по клику — родитель открывает модалку создания (например BoardFormModal с mode="create") */
+  /** Called on click — parent opens creation modal (e.g. BoardFormModal with mode="create") */
   onOpenCreate: () => void;
 };
 

@@ -7,16 +7,145 @@ import {
   MoveTaskDocument,
   type MoveTaskMutation,
   type MoveTaskMutationVariables,
-  TasksByColumnDocument,
-  type TasksByColumnQuery,
-  type TasksByColumnQueryVariables,
+  TasksByBoardDocument,
 } from "@/graphql/generated/graphql";
+
+type TaskLikeNode = {
+  id: string;
+  columnId: string;
+  position?: number | null;
+};
+
+function normalizeBoardQuery(query: string | undefined) {
+  return query?.trim() || undefined;
+}
+
+function clamp(n: number, min: number, max: number) {
+  return Math.min(Math.max(n, min), max);
+}
+
+function byPositionThenId(
+  a: { position?: number | null; id: string },
+  b: { position?: number | null; id: string },
+) {
+  const posA = a.position ?? 0;
+  const posB = b.position ?? 0;
+  if (posA !== posB) return posA - posB;
+  return a.id.localeCompare(b.id);
+}
+
+function getSortedColumnNodes(allNodes: TaskLikeNode[], columnId: string) {
+  return allNodes
+    .filter((n) => n.columnId === columnId)
+    .slice()
+    .sort(byPositionThenId);
+}
+
+function renumberPositions(nodes: TaskLikeNode[]) {
+  nodes.forEach((n, index) => {
+    n.position = index;
+  });
+}
+
+function reorderWithinColumnOnCardDrop(args: {
+  allNodes: TaskLikeNode[];
+  columnId: string;
+  movedId: string;
+  hoverIndexRaw?: number;
+}): boolean {
+  const { allNodes, columnId, movedId, hoverIndexRaw } = args;
+  const nodes = getSortedColumnNodes(allNodes, columnId);
+
+  const fromIndex = nodes.findIndex((n) => n.id === movedId);
+  if (fromIndex === -1) return false;
+
+  const hoverIndex =
+    hoverIndexRaw !== undefined
+      ? clamp(hoverIndexRaw, 0, nodes.length - 1)
+      : nodes.length - 1;
+
+  // Drop is "on card", not "between cards":
+  // dragging up  -> insert before hovered card
+  // dragging down -> insert after hovered card
+  let insertIndex = hoverIndex > fromIndex ? hoverIndex + 1 : hoverIndex;
+  insertIndex = clamp(insertIndex, 0, nodes.length);
+
+  const next = [...nodes];
+  const [removed] = next.splice(fromIndex, 1);
+
+  if (insertIndex > fromIndex) {
+    insertIndex -= 1;
+  }
+  // If index is the same after normalization, there's no reordering to apply.
+  // Still re-number positions to keep them consistent (avoids duplicates).
+  if (insertIndex === fromIndex) {
+    renumberPositions(nodes);
+    return true;
+  }
+  next.splice(insertIndex, 0, removed);
+  renumberPositions(next);
+  return true;
+}
+
+function moveBetweenColumns(args: {
+  allNodes: TaskLikeNode[];
+  fromColumnId: string;
+  toColumnId: string;
+  movedId: string;
+  hoverIndexRaw?: number;
+}): boolean {
+  const { allNodes, fromColumnId, toColumnId, movedId, hoverIndexRaw } = args;
+  const sourceNodes = getSortedColumnNodes(allNodes, fromColumnId);
+  const targetNodes = getSortedColumnNodes(allNodes, toColumnId);
+
+  const fromIndex = sourceNodes.findIndex((n) => n.id === movedId);
+  if (fromIndex === -1) return false;
+
+  const updatedSource = [...sourceNodes];
+  const [removed] = updatedSource.splice(fromIndex, 1);
+  removed.columnId = toColumnId;
+
+  const insertIndex =
+    hoverIndexRaw !== undefined
+      ? clamp(hoverIndexRaw, 0, targetNodes.length)
+      : targetNodes.length;
+
+  const updatedTarget = [...targetNodes];
+  updatedTarget.splice(insertIndex, 0, removed);
+
+  renumberPositions(updatedSource);
+  renumberPositions(updatedTarget);
+  return true;
+}
+
+function rebuildEdgesWithSortedNodes<T extends { node: TaskLikeNode }>(
+  edges: T[],
+  allNodes: TaskLikeNode[],
+) {
+  const edgeById = new Map<string, T>();
+  edges.forEach((edge) => edgeById.set(edge.node.id, edge));
+
+  const sortedNodes = allNodes.slice().sort((a, b) => {
+    if (a.columnId !== b.columnId) {
+      return a.columnId.localeCompare(b.columnId);
+    }
+    return byPositionThenId(a, b);
+  });
+
+  return sortedNodes.flatMap((node) => {
+    const original = edgeById.get(node.id);
+    if (!original) return [];
+    return [{ ...original, node }];
+  });
+}
 
 type MoveTaskParams = {
   id: string;
   sourceColumnId: string;
   targetColumnId: string;
   position?: number | null;
+  boardId: string;
+  searchQuery: string;
 };
 
 type UseMoveTaskResult = {
@@ -30,13 +159,28 @@ export function useMoveTask(): UseMoveTaskResult {
   );
 
   const moveTask = useCallback(
-    async ({ id, sourceColumnId, targetColumnId, position }: MoveTaskParams) => {
+    async ({
+      id,
+      sourceColumnId,
+      targetColumnId,
+      position,
+      boardId,
+      searchQuery,
+    }: MoveTaskParams) => {
       try {
         await mutate({
           variables: {
             id,
             columnId: targetColumnId,
             position: position ?? null,
+          },
+          context: {
+            meta: {
+              sourceColumnId,
+              boardId,
+              query: searchQuery,
+              successMessage: "Task moved",
+            },
           },
           optimisticResponse: {
             moveTask: {
@@ -48,167 +192,78 @@ export function useMoveTask(): UseMoveTaskResult {
               updatedAt: new Date().toISOString(),
             },
           },
+
           update(cache, _result, { variables, context }) {
             const taskId = variables?.id;
-            const destColumnId = variables?.columnId;
-            const srcColumnId = (context as any)?.meta?.sourceColumnId as
-              | string
-              | undefined;
+            const targetColumnId = variables?.columnId;
+            const { boardId, query, sourceColumnId } =
+              (
+                context as {
+                  meta: { boardId: string; query: string; sourceColumnId: string };
+                }
+              )?.meta ?? {};
 
-            if (!taskId || !destColumnId || !srcColumnId) return;
-
+            if (!taskId || !targetColumnId || !boardId) return;
             try {
-              // Moving within the same column (reorder)
-              if (srcColumnId === destColumnId) {
-                const data = cache.readQuery<
-                  TasksByColumnQuery,
-                  TasksByColumnQueryVariables
-                >({
-                  query: TasksByColumnDocument,
-                  variables: { columnId: srcColumnId, first: 100 },
-                });
-                if (!data?.tasksByColumn) return;
-
-                const edges = [...data.tasksByColumn.edges];
-                const fromIndex = edges.findIndex((edge) => edge.node.id === taskId);
-                if (fromIndex === -1) return;
-
-                const [movedEdge] = edges.splice(fromIndex, 1);
-                // After removal, edges.length = N-1. Inserting at position gives the desired order (including append when position === edges.length).
-                const insertIndex =
-                  typeof position === "number" &&
-                  position >= 0 &&
-                  position <= edges.length
-                    ? position
-                    : fromIndex;
-
-                const nextEdges = [
-                  ...edges.slice(0, insertIndex),
-                  movedEdge,
-                  ...edges.slice(insertIndex),
-                ];
-
-                const recomputePositions = (
-                  es: TasksByColumnQuery["tasksByColumn"]["edges"],
-                ) =>
-                  es.map((edge, index) => ({
-                    ...edge,
-                    node: {
-                      ...edge.node,
-                      position: index,
-                    },
-                  }));
-
-                const finalEdges = recomputePositions(nextEdges);
-
-                cache.writeQuery<TasksByColumnQuery, TasksByColumnQueryVariables>({
-                  query: TasksByColumnDocument,
-                  variables: { columnId: srcColumnId, first: 100 },
-                  data: {
-                    tasksByColumn: {
-                      __typename: "TaskConnection",
-                      edges: finalEdges,
-                      pageInfo: data.tasksByColumn.pageInfo,
-                    },
-                  },
-                });
-
-                return;
-              }
-
-              // Moving between different columns
-              const sourceData = cache.readQuery<
-                TasksByColumnQuery,
-                TasksByColumnQueryVariables
-              >({
-                query: TasksByColumnDocument,
-                variables: { columnId: srcColumnId, first: 100 },
-              });
-              const destData = cache.readQuery<
-                TasksByColumnQuery,
-                TasksByColumnQueryVariables
-              >({
-                query: TasksByColumnDocument,
-                variables: { columnId: destColumnId, first: 100 },
-              });
-
-              if (!sourceData?.tasksByColumn || !destData?.tasksByColumn) return;
-
-              const sourceEdges = [...sourceData.tasksByColumn.edges];
-              const destEdges = [...destData.tasksByColumn.edges];
-
-              const edgeIndex = sourceEdges.findIndex((edge) => edge.node.id === taskId);
-              if (edgeIndex === -1) return;
-
-              const [movedEdge] = sourceEdges.splice(edgeIndex, 1);
-
-              const updatedMovedEdge = {
-                ...movedEdge,
-                node: {
-                  ...movedEdge.node,
-                  columnId: destColumnId,
-                },
+              const normalizedQuery = normalizeBoardQuery(query);
+              const cacheKeyVars = {
+                boardId,
+                query: normalizedQuery,
+                first: 100,
               };
 
-              const insertPosition =
-                typeof position === "number" &&
-                position >= 0 &&
-                position <= destEdges.length
-                  ? position
-                  : 0;
-
-              const nextDestEdges = [
-                ...destEdges.slice(0, insertPosition),
-                updatedMovedEdge,
-                ...destEdges.slice(insertPosition),
-              ];
-
-              const recomputePositions = (
-                edges: TasksByColumnQuery["tasksByColumn"]["edges"],
-              ) =>
-                edges.map((edge, index) => ({
-                  ...edge,
-                  node: {
-                    ...edge.node,
-                    position: index,
-                  },
-                }));
-
-              const nextSourceEdges = recomputePositions(sourceEdges);
-              const finalDestEdges = recomputePositions(nextDestEdges);
-
-              cache.writeQuery<TasksByColumnQuery, TasksByColumnQueryVariables>({
-                query: TasksByColumnDocument,
-                variables: { columnId: srcColumnId, first: 100 },
-                data: {
-                  tasksByColumn: {
-                    __typename: "TaskConnection",
-                    edges: nextSourceEdges,
-                    pageInfo: sourceData.tasksByColumn.pageInfo,
-                  },
-                },
+              const data = cache.readQuery({
+                query: TasksByBoardDocument,
+                variables: cacheKeyVars,
               });
+              if (!data?.tasksByBoard) return;
 
-              cache.writeQuery<TasksByColumnQuery, TasksByColumnQueryVariables>({
-                query: TasksByColumnDocument,
-                variables: { columnId: destColumnId, first: 100 },
+              // Clone edges/nodes so we can safely mutate positions and columnId locally
+              const edges = data.tasksByBoard.edges.map((edge) => ({
+                ...edge,
+                node: { ...edge.node },
+              }));
+
+              const allNodes = edges.map((e) => e.node);
+              const movedNode = allNodes.find((n) => n.id === taskId);
+              if (!movedNode) return;
+
+              const hoverIndexRaw =
+                typeof position === "number" && position >= 0 ? position : undefined;
+
+              if (sourceColumnId === targetColumnId) {
+                const changed = reorderWithinColumnOnCardDrop({
+                  allNodes,
+                  columnId: sourceColumnId,
+                  movedId: movedNode.id,
+                  hoverIndexRaw,
+                });
+                if (!changed) return;
+              } else {
+                const changed = moveBetweenColumns({
+                  allNodes,
+                  fromColumnId: sourceColumnId,
+                  toColumnId: targetColumnId,
+                  movedId: movedNode.id,
+                  hoverIndexRaw,
+                });
+                if (!changed) return;
+              }
+
+              const nextEdges = rebuildEdgesWithSortedNodes(edges, allNodes);
+              cache.writeQuery({
+                query: TasksByBoardDocument,
+                variables: cacheKeyVars,
                 data: {
-                  tasksByColumn: {
-                    __typename: "TaskConnection",
-                    edges: finalDestEdges,
-                    pageInfo: destData.tasksByColumn.pageInfo,
+                  tasksByBoard: {
+                    ...data.tasksByBoard,
+                    edges: nextEdges,
                   },
                 },
               });
             } catch {
-              // queries might not be in cache
+              // ignore
             }
-          },
-          context: {
-            meta: {
-              sourceColumnId,
-              successMessage: "Task moved",
-            },
           },
         });
       } catch (err) {

@@ -16,6 +16,7 @@ type TaskPriorityChoice = "low" | "medium" | "high";
 
 export type TaskFormValues = {
   title: string;
+  columnId: string;
   description: string;
   statusId: string;
   priority: TaskPriorityChoice;
@@ -109,6 +110,7 @@ export function TaskModal({
 
     await onSubmit({
       title: trimmedTitle,
+      columnId: statusId,
       description: description.trim(),
       statusId,
       priority,
@@ -190,38 +192,40 @@ export function TaskModal({
               </div>
 
               <div className="flex flex-col gap-2">
-                <div>
-                  <Label htmlFor="task-status">Status</Label>
-                  {statusOptions.length < 2 ? (
-                    <p className="h-9 w-full flex items-center capitalize rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground shadow-sm">
-                      {statusOptions[0]?.label}
-                    </p>
-                  ) : (
-                    <div className="relative">
-                      <Select
-                        id="task-status"
-                        className="h-9 w-full appearance-none capitalize"
-                        value={statusId}
-                        onChange={(event) => setStatusId(event.target.value)}
-                        disabled={!hasStatuses}
-                      >
-                        {!hasStatuses && <option>No columns available</option>}
-                        {statusOptions.map((option) => (
-                          <option
-                            key={option.id}
-                            value={option.id}
-                            className="capitalize"
-                          >
-                            {option.label}
-                          </option>
-                        ))}
-                      </Select>
-                      {hasStatuses && (
-                        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
-                      )}
-                    </div>
-                  )}
-                </div>
+                {mode === "create" && (
+                  <div>
+                    <Label htmlFor="task-status">Status</Label>
+                    {statusOptions.length < 2 ? (
+                      <p className="h-9 w-full flex items-center capitalize rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground shadow-sm">
+                        {statusOptions[0]?.label}
+                      </p>
+                    ) : (
+                      <div className="relative">
+                        <Select
+                          id="task-status"
+                          className="h-9 w-full appearance-none capitalize"
+                          value={statusId}
+                          onChange={(event) => setStatusId(event.target.value)}
+                          disabled={!hasStatuses}
+                        >
+                          {!hasStatuses && <option>No columns available</option>}
+                          {statusOptions.map((option) => (
+                            <option
+                              key={option.id}
+                              value={option.id}
+                              className="capitalize"
+                            >
+                              {option.label}
+                            </option>
+                          ))}
+                        </Select>
+                        {hasStatuses && (
+                          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div>
                   <Label htmlFor="task-priority">Priority</Label>

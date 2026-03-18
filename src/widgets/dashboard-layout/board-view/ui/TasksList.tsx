@@ -4,6 +4,7 @@ import { type BoardLabel } from "@/entities/label";
 type TasksListProps = {
   tasks: BoardTask[];
   labels: BoardLabel[];
+  isDragDisabled?: boolean;
   onTaskClick?: (task: BoardTask) => void;
   onTaskEdit?: (task: BoardTask) => void;
   onTaskDelete?: (task: BoardTask) => void;
@@ -18,6 +19,7 @@ type TasksListProps = {
 export function TasksList({
   tasks,
   labels,
+  isDragDisabled,
   onTaskClick,
   onTaskEdit,
   onTaskDelete,
@@ -49,6 +51,7 @@ export function TasksList({
             labels={taskLabels}
             index={index}
             columnId={task.columnId}
+            isDragDisabled={isDragDisabled}
             onClick={onTaskClick ? () => onTaskClick(task) : undefined}
             onEdit={onTaskEdit ? () => onTaskEdit(task) : undefined}
             onDelete={onTaskDelete ? () => onTaskDelete(task) : undefined}
