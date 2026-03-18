@@ -20,7 +20,7 @@ export function DeleteTaskConfirmModal({
 
   const handleConfirm = useCallback(async () => {
     if (!task) return;
-    await deleteTask({ id: task.id, columnId: task.columnId });
+    await deleteTask({ id: task.id, boardId: task.boardId });
     onClose();
   }, [deleteTask, onClose, task]);
 
@@ -31,8 +31,8 @@ export function DeleteTaskConfirmModal({
       <ModalHeader title="Delete task" onClose={onClose} />
       <ModalBody>
         <p className="text-sm text-muted-foreground">
-          Are you sure you want to delete &quot;{task.title}&quot;? This action cannot
-          be undone.
+          Are you sure you want to delete &quot;{task.title}&quot;? This action cannot be
+          undone.
         </p>
       </ModalBody>
       <ModalFooter
@@ -46,4 +46,3 @@ export function DeleteTaskConfirmModal({
     </Modal>
   );
 }
-

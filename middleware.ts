@@ -2,8 +2,8 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 export function middleware(_request: NextRequest) {
-  // Заглушка для EPIC-02: здесь позже будет проверка JWT в httpOnly cookie
-  // и редиректы в зависимости от того, авторизован пользователь или нет.
+// Placeholder for EPIC-02: here we will later add JWT checks in httpOnly cookie
+// and redirects depending on whether the user is authenticated or not.
   return NextResponse.next();
 }
 

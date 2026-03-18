@@ -26,7 +26,7 @@ type DeleteBoardConfirmModalProps = {
   open: boolean;
   onClose: () => void;
   board: SidebarBoard | null;
-  /** Если удаляемый борд выбран — после удаления сбрасываем URL */
+  /** If the deleted board is currently selected, reset URL after deletion */
   selectedBoardId: string | null;
 };
 

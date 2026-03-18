@@ -4,21 +4,24 @@ import { useCallback } from "react";
 import { useMutation } from "@apollo/client/react";
 import {
   CreateTaskDocument,
-  TasksByColumnDocument,
+  TasksByBoardDocument,
   TaskPriority,
   type CreateTaskMutation,
   type CreateTaskMutationVariables,
-  type TasksByColumnQuery,
-  type TasksByColumnQueryVariables,
+  type TasksByBoardQueryVariables,
+  type TasksByBoardQuery,
 } from "@/graphql/generated/graphql";
 
 type UseCreateTaskParams = {
   columnId: string;
+  boardId?: string | null;
 };
 
 type UseCreateTaskResult = {
   createTask: (input: {
     title: string;
+    statusId: string;
+    columnId: string;
     description?: string;
     priority?: TaskPriority;
     labelIds?: string[];
@@ -27,7 +30,7 @@ type UseCreateTaskResult = {
   loading: boolean;
 };
 
-export function useCreateTask({ columnId }: UseCreateTaskParams): UseCreateTaskResult {
+export function useCreateTask({ boardId }: UseCreateTaskParams): UseCreateTaskResult {
   const [mutate, { loading }] = useMutation<
     CreateTaskMutation,
     CreateTaskMutationVariables
@@ -36,12 +39,16 @@ export function useCreateTask({ columnId }: UseCreateTaskParams): UseCreateTaskR
   const createTask = useCallback(
     async ({
       title,
+      statusId,
+      columnId,
       description,
       priority,
       labelIds,
       dueDate,
     }: {
       title: string;
+      statusId: string;
+      columnId: string;
       description?: string;
       priority?: TaskPriority;
       labelIds?: string[];
@@ -74,7 +81,7 @@ export function useCreateTask({ columnId }: UseCreateTaskParams): UseCreateTaskR
             title: trimmed,
             description: description?.trim() || null,
             priority: finalPriority,
-            statusId: "",
+            statusId: statusId,
             labelIds: labelIds ?? [],
             dueDate: dueDateIso,
             assigneeId: null,
@@ -86,52 +93,64 @@ export function useCreateTask({ columnId }: UseCreateTaskParams): UseCreateTaskR
         update(cache, { data }) {
           const created = data?.createTask;
 
+          if (!boardId) return;
+
           try {
+            const variables = {
+              boardId,
+              first: 100,
+              query: undefined,
+            } satisfies TasksByBoardQueryVariables;
+
             const existing = cache.readQuery<
-              TasksByColumnQuery,
-              TasksByColumnQueryVariables
+              TasksByBoardQuery,
+              TasksByBoardQueryVariables
             >({
-              query: TasksByColumnDocument,
-              variables: { columnId, first: 100 },
+              query: TasksByBoardDocument,
+              variables,
             });
 
-            const edges = existing?.tasksByColumn.edges ?? [];
-
+            const edges = existing?.tasksByBoard.edges ?? [];
             const withoutOptimistic = edges.filter(
               (edge) => edge.node.id !== optimisticId,
             );
+
             const finalNode =
               created ??
               edges.find((edge) => edge.node.id === optimisticId)?.node ??
               null;
 
-            const nextEdges = finalNode
-              ? [
-                  {
-                    __typename: "TaskEdge" as const,
-                    cursor: optimisticId,
-                    node: finalNode,
-                  },
-                  ...withoutOptimistic,
-                ]
-              : withoutOptimistic;
+            if (!finalNode) return;
 
-            cache.writeQuery<TasksByColumnQuery, TasksByColumnQueryVariables>({
-              query: TasksByColumnDocument,
-              variables: { columnId, first: 100 },
+            const nextEdges = [
+              {
+                __typename: "TaskEdge" as const,
+                cursor: finalNode.id,
+                node: finalNode,
+              },
+              ...withoutOptimistic,
+            ];
+
+            cache.writeQuery<TasksByBoardQuery, TasksByBoardQueryVariables>({
+              query: TasksByBoardDocument,
+              variables,
               data: {
-                tasksByColumn: {
+                tasksByBoard: {
                   __typename: "TaskConnection",
                   edges: nextEdges,
-                  pageInfo: existing?.tasksByColumn.pageInfo ?? {
+                  pageInfo: existing?.tasksByBoard.pageInfo ?? {
                     __typename: "PageInfo",
                     hasNextPage: false,
+                    hasPreviousPage: false,
+                    startCursor: null,
                     endCursor: null,
                   },
                 },
               },
             });
-          } catch {}
+          } catch {
+            // ignore
+          }
         },
         context: {
           meta: {
@@ -140,7 +159,7 @@ export function useCreateTask({ columnId }: UseCreateTaskParams): UseCreateTaskR
         },
       });
     },
-    [columnId, mutate],
+    [boardId, mutate],
   );
 
   return { createTask, loading };

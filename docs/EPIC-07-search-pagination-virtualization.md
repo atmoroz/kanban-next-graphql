@@ -201,6 +201,60 @@ This matches behavior used in:
 
 ---
 
+# Search Mode vs Default Mode (Switching Logic)
+
+When search or filters are active, the board must switch to **"search mode"**.
+
+In this mode:
+
+- tasks are fetched using `tasksByBoard`
+- tasks are **NOT** fetched per column (no `tasksByColumn` calls)
+- UI may group tasks by `columnId` on the client
+- drag & drop is **disabled or limited**
+
+Do **not** mix `tasksByColumn` and `tasksByBoard` at the same time for the same board view.
+
+Recommended pattern (in a widget, e.g. `widgets/board-view`):
+
+```ts
+const isSearchMode = Boolean(searchQuery) || filtersActive;
+
+if (!isSearchMode) {
+  // DEFAULT MODE
+  // → useTasksByColumn(column.id) per column
+} else {
+  // SEARCH MODE
+  // → useTasksByBoard({ boardId, query, filters })
+}
+```
+
+`features/filters` is responsible for search/filter state.  
+`widgets/board-view` is responsible for **orchestrating** which query is used based on that state.
+
+---
+
+# Drag & Drop in Search Mode
+
+In search mode:
+
+- ❌ drag & drop is generally **disabled**
+  - or
+- ⚠ works in a **very limited** way (not recommended)
+
+Reasons:
+
+- the visual order does not correspond to `column.position`
+- data is not local to a single column (flat list, cross-filtered)
+
+Best UX (similar to Linear):
+
+| Mode        | Behavior      |
+|------------|---------------|
+| Default    | drag enabled  |
+| Search     | drag disabled |
+
+---
+
 # Recommended Hook Architecture
 
 Instead of handling logic inside UI components, create a hook:

@@ -7,12 +7,11 @@ import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/button";
 import type { BoardColumn } from "../model/column.types";
 import { TasksList } from "@/widgets/dashboard-layout/board-view/ui/TasksList";
-import { useTasksByColumn, type BoardTask } from "@/entities/task";
+import { useBoardTasks, type BoardTask } from "@/entities/task";
 import { useLabels } from "@/entities/label";
 
 type ColumnProps = {
   column: BoardColumn;
-  tasksCount?: number;
   isMenuOpen: boolean;
   onOpenMenu: (id: string | null) => void;
   onEdit?: (column: BoardColumn) => void;
@@ -23,11 +22,12 @@ type ColumnProps = {
   allColumns: BoardColumn[];
   onTaskMoveTo?: (task: BoardTask, targetColumnId: string, targetIndex?: number) => void;
   boardId: string;
+  isSearchMode: boolean;
+  searchQuery: string;
 };
 
 export function Column({
   column,
-  tasksCount = 0,
   isMenuOpen,
   onOpenMenu,
   onEdit,
@@ -38,11 +38,20 @@ export function Column({
   allColumns,
   onTaskMoveTo,
   boardId,
+  isSearchMode,
+  searchQuery,
 }: ColumnProps) {
   const menuRef = useRef<HTMLDivElement | null>(null);
-  const { tasks, isLoading: tasksLoading } = useTasksByColumn(column.id);
-  const { labels, isLoading: labelsLoading } = useLabels(boardId);
 
+  const { tasksByColumn: tasksByBoard, isLoading: tasksByBoardLoading } = useBoardTasks({
+    boardId,
+    query: searchQuery,
+    first: 100,
+  });
+  const { labels, isLoading: labelsLoading } = useLabels(boardId);
+  const tasks = tasksByBoard[column.id] ?? [];
+  const tasksLoading = tasksByBoardLoading;
+  const tasksCount = tasksByBoard[column.id]?.length ?? 0;
   const moveTargets = allColumns
     .filter((c) => c.id !== column.id)
     .map((c) => ({ id: c.id, label: c.title }));
@@ -108,7 +117,7 @@ export function Column({
             {column.title}
           </h3>
           <span className="inline-flex h-5 min-w-7 items-center justify-center rounded-full border border-border bg-background px-2 text-[11px] text-muted-foreground">
-            {tasksCount ?? tasks.length}
+            {tasksCount}
           </span>
         </div>
         <Button
@@ -122,7 +131,7 @@ export function Column({
         </Button>
       </header>
 
-      <div className="relative flex-1 space-y-3  px-4 text-sm text-muted-foreground">
+      <div className="relative flex-1 space-y-3  px-4 pb-16 text-sm text-muted-foreground">
         {showBackdrop && (
           <div
             className="absolute inset-0 z-10 rounded-b-lg bg-muted/80 pointer-events-none transition-opacity duration-150"
@@ -136,7 +145,7 @@ export function Column({
           </div>
         )}
 
-        {!tasksLoading && !labelsLoading && (
+        {
           <TasksList
             tasks={tasks}
             labels={labels}
@@ -146,8 +155,9 @@ export function Column({
             moveTargets={moveTargets}
             isMoveDisabled={isMoveDisabled}
             onTaskMoveTo={onTaskMoveTo}
+            isDragDisabled={isSearchMode}
           />
-        )}
+        }
       </div>
 
       {isMenuOpen && (

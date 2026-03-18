@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
-import { MoreHorizontal, Pencil, MoveRight, Trash2 } from "lucide-react";
+import { Pencil, MoveRight, Trash2, MoreVertical } from "lucide-react";
 import { Card } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
 import type { TaskPriority } from "@/graphql/generated/graphql";
@@ -16,9 +16,10 @@ type TaskCardProps = {
   onDelete?: () => void;
   index: number;
   columnId: string;
+  isDragDisabled?: boolean;
   moveTargets?: { id: string; label: string }[];
   isMoveDisabled?: boolean;
-  /** targetColumnId, targetIndex, и при дропе — перетаскиваемая задача { id, columnId } */
+  /** targetColumnId, targetIndex, and on drop — dragged task { id, columnId } */
   onMoveTo?: (
     targetColumnId: string,
     targetIndex?: number,
@@ -26,7 +27,7 @@ type TaskCardProps = {
   ) => void;
   onDragStart?: (taskId: string) => void;
   onDragEnd?: () => void;
-  /** id карточки, над которой курсор (стабильно, не индекс) */
+  /** id of the card currently hovered (stable id, not index) */
   onDragOver?: (overTaskId: string | null) => void;
 };
 
@@ -38,6 +39,7 @@ export function TaskCard({
   onDelete,
   index,
   columnId,
+  isDragDisabled = false,
   moveTargets,
   isMoveDisabled,
   onMoveTo,
@@ -85,6 +87,7 @@ export function TaskCard({
     () => ({
       type: "TASK",
       item: { id: task.id, columnId: task.columnId },
+      canDrag: !isDragDisabled,
       collect: (monitor) => ({
         isDragging: monitor.isDragging(),
       }),
@@ -92,7 +95,7 @@ export function TaskCard({
         onDragEnd?.();
       },
     }),
-    [task.id, task.columnId, onDragEnd],
+    [task.id, task.columnId, isDragDisabled, onDragEnd],
   );
 
   useEffect(() => {
@@ -187,7 +190,7 @@ export function TaskCard({
         }}
         aria-label="Task actions"
       >
-        <MoreHorizontal className="size-4" aria-hidden="true" />
+        <MoreVertical className="size-4" aria-hidden="true" />
       </Button>
 
       <div className="pr-7">
@@ -227,7 +230,7 @@ export function TaskCard({
         </div>
       )}
 
-      {/* TODO: labels (LabelBadge), assignee avatar и drag‑handle по макету figma */}
+      {/* TODO: labels (LabelBadge), assignee avatar and drag handle according to Figma design */}
 
       {isMenuOpen && (
         <div

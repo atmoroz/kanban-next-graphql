@@ -33,7 +33,7 @@ export function BoardView({ selectedBoard, isLoading }: BoardViewProps) {
               <BoardLabelsPanel boardId={boardId} />
             </div>
           </div>
-          <div className="flex-1 overflow-auto px-6 pb-0 pt-4 text-sm text-muted-foreground">
+          <div className="flex-1 overflow-hidden px-6 pb-0 pt-4 text-sm text-muted-foreground">
             {isLoading && !selectedBoard && (
               <div className="flex h-full items-center justify-center">
                 <p>Loading board data...</p>
