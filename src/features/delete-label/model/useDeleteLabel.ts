@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { useMutation } from "@apollo/client/react";
+import { CombinedGraphQLErrors } from "@apollo/client/errors";
 import {
   BoardLabelsDocument,
   DeleteLabelDocument,
@@ -37,12 +38,16 @@ export function useDeleteLabel(boardId: string) {
 
   const deleteLabel = useCallback(
     async (labelId: string) => {
-      await mutate({
-        variables: { id: labelId },
-        optimisticResponse: {
-          deleteLabel: true,
-        },
-      });
+      try {
+        await mutate({
+          variables: { id: labelId },
+          optimisticResponse: {
+            deleteLabel: true,
+          },
+        });
+      } catch (err: unknown) {
+        if (!CombinedGraphQLErrors.is(err)) throw err;
+      }
     },
     [mutate],
   );

@@ -1,0 +1,9 @@
+mutation InviteByEmail($boardId: ID!, $email: String!, $role: BoardRole!) {
+  inviteByEmail(boardId: $boardId, email: $email, role: $role) {
+    id
+    email
+    role
+    status
+  }
+}
+

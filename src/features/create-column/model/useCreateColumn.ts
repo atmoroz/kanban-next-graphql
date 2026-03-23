@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { useMutation } from "@apollo/client/react";
+import { CombinedGraphQLErrors } from "@apollo/client/errors";
 import {
   BoardsDocument,
   ColumnsDocument,
@@ -34,67 +35,71 @@ export function useCreateColumn({
       const optimisticId = `temp-column-${Date.now()}`;
       const now = new Date().toISOString();
 
-      await mutate({
-        variables: { boardId, title: trimmed },
-        optimisticResponse: {
-          createColumn: {
-            __typename: "Column",
-            id: optimisticId,
-            boardId,
-            title: trimmed,
-            position: 0,
-            statusId: "",
-            createdAt: now,
-            updatedAt: now,
+      try {
+        await mutate({
+          variables: { boardId, title: trimmed },
+          optimisticResponse: {
+            createColumn: {
+              __typename: "Column",
+              id: optimisticId,
+              boardId,
+              title: trimmed,
+              position: 0,
+              statusId: "",
+              createdAt: now,
+              updatedAt: now,
+            },
           },
-        },
-        update(cache, { data }) {
-          const created = data?.createColumn;
-          try {
-            const existing = cache.readQuery<ColumnsQuery, ColumnsQueryVariables>({
-              query: ColumnsDocument,
-              variables: { boardId },
-            });
+          update(cache, { data }) {
+            const created = data?.createColumn;
+            try {
+              const existing = cache.readQuery<ColumnsQuery, ColumnsQueryVariables>({
+                query: ColumnsDocument,
+                variables: { boardId },
+              });
 
-            const columns = existing?.columns ?? [];
+              const columns = existing?.columns ?? [];
 
-            const withoutOptimistic = columns.filter((c) => c.id !== optimisticId);
-            const finalColumn = created ?? columns.find((c) => c.id === optimisticId);
+              const withoutOptimistic = columns.filter((c) => c.id !== optimisticId);
+              const finalColumn = created ?? columns.find((c) => c.id === optimisticId);
 
-            const nextColumns = finalColumn
-              ? [...withoutOptimistic, finalColumn].sort(
-                  (a, b) => a.position - b.position,
-                )
-              : withoutOptimistic;
+              const nextColumns = finalColumn
+                ? [...withoutOptimistic, finalColumn].sort(
+                    (a, b) => a.position - b.position,
+                  )
+                : withoutOptimistic;
 
-            cache.writeQuery<ColumnsQuery, ColumnsQueryVariables>({
-              query: ColumnsDocument,
-              variables: { boardId },
-              data: { columns: nextColumns },
-            });
-          } catch {
-            // Columns query might not be in cache yet
-          }
+              cache.writeQuery<ColumnsQuery, ColumnsQueryVariables>({
+                query: ColumnsDocument,
+                variables: { boardId },
+                data: { columns: nextColumns },
+              });
+            } catch {
+              // Columns query might not be in cache yet
+            }
 
-          try {
-            const boardsData = cache.readQuery<BoardsQuery, BoardsQueryVariables>({
-              query: BoardsDocument,
-            });
-            if (!boardsData?.boards) return;
-            cache.writeQuery<BoardsQuery, BoardsQueryVariables>({
-              query: BoardsDocument,
-              data: boardsData,
-            });
-          } catch {
-            // Boards query might not be in cache; safe to ignore
-          }
-        },
-        context: {
-          meta: {
-            successMessage: "Column created",
+            try {
+              const boardsData = cache.readQuery<BoardsQuery, BoardsQueryVariables>({
+                query: BoardsDocument,
+              });
+              if (!boardsData?.boards) return;
+              cache.writeQuery<BoardsQuery, BoardsQueryVariables>({
+                query: BoardsDocument,
+                data: boardsData,
+              });
+            } catch {
+              // Boards query might not be in cache; safe to ignore
+            }
           },
-        },
-      });
+          context: {
+            meta: {
+              successMessage: "Column created",
+            },
+          },
+        });
+      } catch (err: unknown) {
+        if (!CombinedGraphQLErrors.is(err)) throw err;
+      }
     },
     [boardId, mutate],
   );

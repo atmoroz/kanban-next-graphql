@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import type { SidebarBoard } from "@/entities/board";
 import { BoardLabelsPanel } from "@/features/board-labels-panel";
+import { BoardMembersAvatars } from "@/features/invite-board-member/ui/BoardMembersAvatars";
 import { ColumnsContainer } from "./ColumnsContainer";
 
 type BoardViewProps = {
@@ -12,6 +14,7 @@ type BoardViewProps = {
 export function BoardView({ selectedBoard, isLoading }: BoardViewProps) {
   const hasSelectedBoard = !!selectedBoard;
   const boardId = selectedBoard?.id ?? null;
+  const [isCreateLabelOpen, setIsCreateLabelOpen] = useState(false);
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
@@ -29,8 +32,14 @@ export function BoardView({ selectedBoard, isLoading }: BoardViewProps) {
                   </p>
                 </div>
               </div>
-
-              <BoardLabelsPanel boardId={boardId} />
+              <div className="flex flex-col w-[60%] items-end gap-2">
+                <BoardMembersAvatars boardId={boardId} />
+                <BoardLabelsPanel
+                  boardId={boardId}
+                  createLabelOpen={isCreateLabelOpen}
+                  onCreateLabelOpenChange={setIsCreateLabelOpen}
+                />
+              </div>
             </div>
           </div>
           <div className="flex-1 overflow-hidden px-6 pb-0 pt-4 text-sm text-muted-foreground">
@@ -39,7 +48,12 @@ export function BoardView({ selectedBoard, isLoading }: BoardViewProps) {
                 <p>Loading board data...</p>
               </div>
             )}
-            {selectedBoard && <ColumnsContainer boardId={selectedBoard.id} />}
+            {selectedBoard && (
+              <ColumnsContainer
+                boardId={selectedBoard.id}
+                onOpenCreateLabel={() => setIsCreateLabelOpen(true)}
+              />
+            )}
           </div>
         </>
       ) : (

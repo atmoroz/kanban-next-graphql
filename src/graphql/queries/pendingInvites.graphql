@@ -1,0 +1,9 @@
+query PendingInvites($boardId: ID!) {
+  pendingInvites(boardId: $boardId) {
+    id
+    email
+    role
+    status
+  }
+}
+

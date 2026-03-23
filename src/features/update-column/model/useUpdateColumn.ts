@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { useMutation } from "@apollo/client/react";
+import { CombinedGraphQLErrors } from "@apollo/client/errors";
 import { UpdateColumnDocument } from "@/graphql/generated/graphql";
 
 type UseUpdateColumnResult = {
@@ -17,14 +18,18 @@ export function useUpdateColumn(): UseUpdateColumnResult {
       const trimmed = title.trim();
       if (!trimmed) return;
 
-      await mutate({
-        variables: { id, title: trimmed },
-        context: {
-          meta: {
-            successMessage: "Column updated",
+      try {
+        await mutate({
+          variables: { id, title: trimmed },
+          context: {
+            meta: {
+              successMessage: "Column updated",
+            },
           },
-        },
-      });
+        });
+      } catch (err: unknown) {
+        if (!CombinedGraphQLErrors.is(err)) throw err;
+      }
     },
     [mutate],
   );

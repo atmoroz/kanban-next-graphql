@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { useMutation } from "@apollo/client/react";
+import { CombinedGraphQLErrors } from "@apollo/client/errors";
 import {
   UpdateTaskLabelsDocument,
   type UpdateTaskLabelsMutation,
@@ -23,12 +24,17 @@ export function useUpdateTaskLabels(): UseUpdateTaskLabelsResult {
     async ({ taskId, labelIds }: { taskId: string; labelIds: string[] }) => {
       if (!labelIds) return;
 
-      await mutate({
-        variables: {
-          taskId,
-          labelIds,
-        },
-      });
+      try {
+        await mutate({
+          variables: {
+            taskId,
+            labelIds,
+          },
+        });
+      } catch (err: unknown) {
+        // errorLink already shows toast; prevent Next runtime overlay.
+        if (!CombinedGraphQLErrors.is(err)) throw err;
+      }
     },
     [mutate],
   );

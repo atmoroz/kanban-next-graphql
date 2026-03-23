@@ -24,6 +24,7 @@ type ColumnProps = {
   boardId: string;
   isSearchMode: boolean;
   searchQuery: string;
+  assigneeInitialsByUserId?: Record<string, string>;
 };
 
 export function Column({
@@ -40,6 +41,7 @@ export function Column({
   boardId,
   isSearchMode,
   searchQuery,
+  assigneeInitialsByUserId,
 }: ColumnProps) {
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -156,6 +158,7 @@ export function Column({
             isMoveDisabled={isMoveDisabled}
             onTaskMoveTo={onTaskMoveTo}
             isDragDisabled={isSearchMode}
+          assigneeInitialsByUserId={assigneeInitialsByUserId}
           />
         }
       </div>

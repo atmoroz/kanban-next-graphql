@@ -39,7 +39,7 @@ export function RegisterForm() {
         setError(data.error ?? "Registration failed");
         return;
       }
-      router.push("/");
+      router.push("/login");
       router.refresh();
     } catch {
       setError("Network error. Please try again.");

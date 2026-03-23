@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { useMutation } from "@apollo/client/react";
+import { CombinedGraphQLErrors } from "@apollo/client/errors";
 import {
   UpdateTaskDocument,
   type UpdateTaskMutation,
@@ -44,31 +45,36 @@ export function useUpdateTask(): UseUpdateTaskResult {
 
       const dueDateIso = dueDate ? new Date(dueDate).toISOString() : null;
 
-      await mutate({
-        variables: {
-          id,
-          title: trimmedTitle,
-          description: description?.trim() || undefined,
-          priority,
-          dueDate: dueDateIso ?? undefined,
-          assigneeId: assigneeId ?? undefined,
-        },
-        refetchQueries: [
-          {
-            query: TaskActivitiesDocument,
-            variables: {
-              taskId: id,
-              first: 10,
-              after: null,
+      try {
+        await mutate({
+          variables: {
+            id,
+            title: trimmedTitle,
+            description: description?.trim() || undefined,
+            priority,
+            dueDate: dueDateIso ?? undefined,
+            assigneeId: assigneeId ?? null,
+          },
+          refetchQueries: [
+            {
+              query: TaskActivitiesDocument,
+              variables: {
+                taskId: id,
+                first: 10,
+                after: null,
+              },
+            },
+          ],
+          context: {
+            meta: {
+              successMessage: "Task updated",
             },
           },
-        ],
-        context: {
-          meta: {
-            successMessage: "Task updated",
-          },
-        },
-      });
+        });
+      } catch (err: unknown) {
+        // errorLink already triggers toasts; prevent Next runtime overlay.
+        if (!CombinedGraphQLErrors.is(err)) throw err;
+      }
     },
     [mutate],
   );

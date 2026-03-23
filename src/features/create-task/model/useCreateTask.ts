@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { useMutation } from "@apollo/client/react";
+import { CombinedGraphQLErrors } from "@apollo/client/errors";
 import {
   CreateTaskDocument,
   TasksByBoardDocument,
@@ -26,6 +27,7 @@ type UseCreateTaskResult = {
     priority?: TaskPriority;
     labelIds?: string[];
     dueDate?: string | null;
+    assigneeId?: string | null;
   }) => Promise<void>;
   loading: boolean;
 };
@@ -45,6 +47,7 @@ export function useCreateTask({ boardId }: UseCreateTaskParams): UseCreateTaskRe
       priority,
       labelIds,
       dueDate,
+      assigneeId,
     }: {
       title: string;
       statusId: string;
@@ -53,6 +56,7 @@ export function useCreateTask({ boardId }: UseCreateTaskParams): UseCreateTaskRe
       priority?: TaskPriority;
       labelIds?: string[];
       dueDate?: string | null;
+      assigneeId?: string | null;
     }) => {
       const trimmed = title.trim();
       if (!trimmed) return;
@@ -63,111 +67,117 @@ export function useCreateTask({ boardId }: UseCreateTaskParams): UseCreateTaskRe
       const finalPriority: TaskPriority = priority ?? defaultPriority;
       const dueDateIso = dueDate ? new Date(dueDate).toISOString() : null;
 
-      await mutate({
-        variables: {
-          columnId,
-          title: trimmed,
-          description: description?.trim() || undefined,
-          priority: finalPriority,
-          dueDate: dueDateIso ?? undefined,
-          labelIds: labelIds ?? undefined,
-        },
-        optimisticResponse: {
-          __typename: "Mutation",
-          createTask: {
-            __typename: "Task",
-            id: optimisticId,
+      try {
+        await mutate({
+          variables: {
             columnId,
             title: trimmed,
-            description: description?.trim() || null,
+            description: description?.trim() || undefined,
             priority: finalPriority,
-            statusId: statusId,
-            labelIds: labelIds ?? [],
-            dueDate: dueDateIso,
-            assigneeId: null,
-            position: 0,
-            createdAt: now,
-            updatedAt: now,
+            dueDate: dueDateIso ?? undefined,
+            labelIds: labelIds ?? undefined,
+            assigneeId: assigneeId ?? null,
           },
-        },
-        update(cache, { data }) {
-          const created = data?.createTask;
+          optimisticResponse: {
+            __typename: "Mutation",
+            createTask: {
+              __typename: "Task",
+              id: optimisticId,
+              columnId,
+              title: trimmed,
+              description: description?.trim() || null,
+              priority: finalPriority,
+              statusId: statusId,
+              labelIds: labelIds ?? [],
+              dueDate: dueDateIso,
+              assigneeId: assigneeId ?? null,
+              position: 0,
+              createdAt: now,
+              updatedAt: now,
+            },
+          },
+          update(cache, { data }) {
+            const created = data?.createTask;
 
-          if (!boardId) return;
+            if (!boardId) return;
 
-          try {
-            const variables = {
-              boardId,
-              first: 100,
-              query: undefined,
-            } satisfies TasksByBoardQueryVariables;
+            try {
+              const variables = {
+                boardId,
+                first: 100,
+                query: undefined,
+              } satisfies TasksByBoardQueryVariables;
 
-            const existing = cache.readQuery<
-              TasksByBoardQuery,
-              TasksByBoardQueryVariables
-            >({
-              query: TasksByBoardDocument,
-              variables,
-            });
+              const existing = cache.readQuery<
+                TasksByBoardQuery,
+                TasksByBoardQueryVariables
+              >({
+                query: TasksByBoardDocument,
+                variables,
+              });
 
-            const edges = existing?.tasksByBoard.edges ?? [];
-            const withoutOptimistic = edges.filter(
-              (edge) => edge.node.id !== optimisticId,
-            );
+              const edges = existing?.tasksByBoard.edges ?? [];
+              const withoutOptimistic = edges.filter(
+                (edge) => edge.node.id !== optimisticId,
+              );
 
-            const finalNode =
-              created ??
-              edges.find((edge) => edge.node.id === optimisticId)?.node ??
-              null;
+              const finalNode =
+                created ??
+                edges.find((edge) => edge.node.id === optimisticId)?.node ??
+                null;
 
-            if (!finalNode) return;
+              if (!finalNode) return;
 
-            const nextEdges = [
-              {
-                __typename: "TaskEdge" as const,
-                cursor: finalNode.id,
-                node: finalNode,
-              },
-              ...withoutOptimistic,
-            ];
+              const nextEdges = [
+                {
+                  __typename: "TaskEdge" as const,
+                  cursor: finalNode.id,
+                  node: finalNode,
+                },
+                ...withoutOptimistic,
+              ];
 
-            // Prevent duplicates when both optimistic update and subscription
-            // (taskCreated) try to insert the same task.
-            const seen = new Set<string>();
-            const dedupedEdges = nextEdges.filter((edge) => {
-              const nodeId = edge.node.id;
-              if (seen.has(nodeId)) return false;
-              seen.add(nodeId);
-              return true;
-            });
+              // Prevent duplicates when both optimistic update and subscription
+              // (taskCreated) try to insert the same task.
+              const seen = new Set<string>();
+              const dedupedEdges = nextEdges.filter((edge) => {
+                const nodeId = edge.node.id;
+                if (seen.has(nodeId)) return false;
+                seen.add(nodeId);
+                return true;
+              });
 
-            cache.writeQuery<TasksByBoardQuery, TasksByBoardQueryVariables>({
-              query: TasksByBoardDocument,
-              variables,
-              data: {
-                tasksByBoard: {
-                  __typename: "TaskConnection",
-                  edges: dedupedEdges,
-                  pageInfo: existing?.tasksByBoard.pageInfo ?? {
-                    __typename: "PageInfo",
-                    hasNextPage: false,
-                    hasPreviousPage: false,
-                    startCursor: null,
-                    endCursor: null,
+              cache.writeQuery<TasksByBoardQuery, TasksByBoardQueryVariables>({
+                query: TasksByBoardDocument,
+                variables,
+                data: {
+                  tasksByBoard: {
+                    __typename: "TaskConnection",
+                    edges: dedupedEdges,
+                    pageInfo: existing?.tasksByBoard.pageInfo ?? {
+                      __typename: "PageInfo",
+                      hasNextPage: false,
+                      hasPreviousPage: false,
+                      startCursor: null,
+                      endCursor: null,
+                    },
                   },
                 },
-              },
-            });
-          } catch {
-            // ignore
-          }
-        },
-        context: {
-          meta: {
-            successMessage: "Task created",
+              });
+            } catch {
+              // ignore
+            }
           },
-        },
-      });
+          context: {
+            meta: {
+              successMessage: "Task created",
+            },
+          },
+        });
+      } catch (err: unknown) {
+        // errorLink already triggers toasts; prevent Next runtime overlay.
+        if (!CombinedGraphQLErrors.is(err)) throw err;
+      }
     },
     [boardId, mutate],
   );

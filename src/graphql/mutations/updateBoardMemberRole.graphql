@@ -1,0 +1,12 @@
+mutation UpdateBoardMemberRole($boardId: ID!, $userId: ID!, $role: BoardRole!) {
+  updateBoardMemberRole(boardId: $boardId, userId: $userId, role: $role) {
+    userId
+    role
+    user {
+      id
+      email
+      name
+    }
+  }
+}
+

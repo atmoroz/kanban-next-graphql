@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Column, ColumnFormModal, useColumns, type BoardColumn } from "@/entities/column";
@@ -19,13 +19,17 @@ import { useMoveTask } from "@/features/move-task";
 import { useBoardSubscriptionsSync } from "@/features/subscriptions-sync";
 import { TaskPriority } from "@/graphql/generated/graphql";
 import { areArraysEqual } from "@/shared/lib/array/are-arrays-equal";
+import { InviteBoardMemberModal } from "@/features/invite-board-member/ui/InviteBoardMemberModal";
 import { Toolbar } from "./Toolbar";
+import { useBoardMembers } from "@/features/task-modal/model/useBoardMembers";
+import { toInitials } from "@/shared/lib/toInitials";
 
 type ColumnsContainerProps = {
   boardId: string;
+  onOpenCreateLabel: () => void;
 };
 
-export function ColumnsContainer({ boardId }: ColumnsContainerProps) {
+export function ColumnsContainer({ boardId, onOpenCreateLabel }: ColumnsContainerProps) {
   const isSearchMode = useIsBoardSearchMode();
   const { searchQuery: boardSearchQuery } = useBoardFilters();
 
@@ -33,6 +37,17 @@ export function ColumnsContainer({ boardId }: ColumnsContainerProps) {
 
   const { columns } = useColumns(boardId);
   const { labels } = useLabels(boardId);
+  const { members, loading: membersLoading } = useBoardMembers(boardId);
+
+  const assigneeInitialsByUserId = useMemo(() => {
+    if (membersLoading) return undefined;
+    const map: Record<string, string> = {};
+    for (const m of members) {
+      const initials = toInitials(m.user.name, m.user.email);
+      if (initials) map[m.user.id] = initials;
+    }
+    return map;
+  }, [members, membersLoading]);
   const { createColumn, loading: createLoading } = useCreateColumn({ boardId });
   const { updateColumn, loading: updateLoading } = useUpdateColumn();
   const [createOpen, setCreateOpen] = useState(false);
@@ -40,6 +55,7 @@ export function ColumnsContainer({ boardId }: ColumnsContainerProps) {
   const [editingColumn, setEditingColumn] = useState<BoardColumn | null>(null);
   const [columnToDelete, setColumnToDelete] = useState<BoardColumn | null>(null);
   const [createTaskOpen, setCreateTaskOpen] = useState(false);
+  const [inviteMemberOpen, setInviteMemberOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<BoardTask | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<BoardTask | null>(null);
 
@@ -89,6 +105,7 @@ export function ColumnsContainer({ boardId }: ColumnsContainerProps) {
     dueDate,
     statusId,
     columnId,
+    assigneeId,
   }: TaskFormValues) => {
     if (!firstColumnId) return;
 
@@ -100,6 +117,7 @@ export function ColumnsContainer({ boardId }: ColumnsContainerProps) {
       priority: mapPriority(priority),
       labelIds,
       dueDate,
+      assigneeId,
     });
 
     setCreateTaskOpen(false);
@@ -111,6 +129,7 @@ export function ColumnsContainer({ boardId }: ColumnsContainerProps) {
     priority,
     labelIds,
     dueDate,
+    assigneeId,
   }: TaskFormValues) => {
     if (!editingTask) return;
 
@@ -123,6 +142,7 @@ export function ColumnsContainer({ boardId }: ColumnsContainerProps) {
         description,
         priority: mapPriority(priority),
         dueDate,
+        assigneeId,
       }),
     );
 
@@ -148,6 +168,8 @@ export function ColumnsContainer({ boardId }: ColumnsContainerProps) {
         setCreateTaskOpen={setCreateTaskOpen}
         columns={columns}
         createTaskLoading={createTaskLoading}
+        onOpenCreateLabel={onOpenCreateLabel}
+        onOpenInviteMember={() => setInviteMemberOpen(true)}
       />
       <DndProvider backend={HTML5Backend}>
         <div className="flex h-full flex-col gap-4 overflow-auto">
@@ -190,6 +212,7 @@ export function ColumnsContainer({ boardId }: ColumnsContainerProps) {
                 boardId={boardId}
                 isSearchMode={isSearchMode}
                 searchQuery={boardSearchQuery}
+                assigneeInitialsByUserId={assigneeInitialsByUserId}
               />
             ))}
           </div>
@@ -225,6 +248,7 @@ export function ColumnsContainer({ boardId }: ColumnsContainerProps) {
             open={createTaskOpen}
             onClose={() => setCreateTaskOpen(false)}
             isSubmitting={createTaskLoading}
+            boardId={boardId}
             statusOptions={columns.map((column) => ({
               id: column.id,
               label: column.title,
@@ -233,12 +257,18 @@ export function ColumnsContainer({ boardId }: ColumnsContainerProps) {
             initialStatusId={firstColumnId}
             onSubmit={handleCreateTask}
           />
+          <InviteBoardMemberModal
+            open={inviteMemberOpen}
+            onClose={() => setInviteMemberOpen(false)}
+            boardId={boardId}
+          />
           {editingTask && (
             <TaskModal
               open={!!editingTask}
               onClose={() => setEditingTask(null)}
               mode="update"
               isSubmitting={labelsSubmitting}
+              boardId={boardId}
               statusOptions={columns.map((column) => ({
                 id: column.id,
                 label: column.title,
@@ -255,6 +285,7 @@ export function ColumnsContainer({ boardId }: ColumnsContainerProps) {
                     : "medium"
               }
               initialLabelIds={editingTask.labelIds}
+              initialAssigneeId={editingTask.assigneeId ?? null}
               initialDueDate={editingTask.dueDate}
               createdAt={editingTask.createdAt}
               taskId={editingTask.id}

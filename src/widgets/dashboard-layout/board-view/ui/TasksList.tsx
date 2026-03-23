@@ -14,6 +14,7 @@ type TasksListProps = {
   onDragStart?: (taskId: string) => void;
   onDragEnd?: () => void;
   onDragOver?: (overTaskId: string | null) => void;
+  assigneeInitialsByUserId?: Record<string, string>;
 };
 
 export function TasksList({
@@ -29,6 +30,7 @@ export function TasksList({
   onDragStart,
   onDragEnd,
   onDragOver,
+  assigneeInitialsByUserId,
 }: TasksListProps) {
   if (!tasks.length) {
     return null;
@@ -52,6 +54,7 @@ export function TasksList({
             index={index}
             columnId={task.columnId}
             isDragDisabled={isDragDisabled}
+            assigneeInitialsByUserId={assigneeInitialsByUserId}
             onClick={onTaskClick ? () => onTaskClick(task) : undefined}
             onEdit={onTaskEdit ? () => onTaskEdit(task) : undefined}
             onDelete={onTaskDelete ? () => onTaskDelete(task) : undefined}

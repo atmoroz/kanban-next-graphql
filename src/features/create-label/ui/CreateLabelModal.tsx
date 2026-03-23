@@ -1,16 +1,10 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { useMutation } from "@apollo/client/react";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/shared/ui/modal";
 import { Label as FieldLabel } from "@/shared/ui/label";
 import { Input } from "@/shared/ui/input";
-import {
-  BoardLabelsDocument,
-  CreateLabelDocument,
-  type BoardLabelsQuery,
-  type BoardLabelsQueryVariables,
-} from "@/graphql/generated/graphql";
+import { useCreateLabel } from "@/features/create-label/model/useCreateLabel";
 
 type CreateLabelModalProps = {
   open: boolean;
@@ -22,31 +16,7 @@ export function CreateLabelModal({ open, onClose, boardId }: CreateLabelModalPro
   const [name, setName] = useState("");
   const [color, setColor] = useState("#22C55E");
 
-  const [createLabel, { loading }] = useMutation(CreateLabelDocument, {
-    update(cache, { data }) {
-      const newLabel = data?.createLabel;
-      if (!newLabel) return;
-
-      try {
-        const existing = cache.readQuery<BoardLabelsQuery, BoardLabelsQueryVariables>({
-          query: BoardLabelsDocument,
-          variables: { boardId },
-        });
-
-        const nextLabels = existing?.boardLabels ?? [];
-
-        cache.writeQuery<BoardLabelsQuery, BoardLabelsQueryVariables>({
-          query: BoardLabelsDocument,
-          variables: { boardId },
-          data: {
-            boardLabels: [...nextLabels, newLabel],
-          },
-        });
-      } catch {
-        // boardLabels might not be in cache yet
-      }
-    },
-  });
+  const { createLabel, loading } = useCreateLabel({ boardId });
 
   const resetForm = useCallback(() => {
     setName("");
@@ -59,27 +29,12 @@ export function CreateLabelModal({ open, onClose, boardId }: CreateLabelModalPro
       const trimmedName = name.trim();
       if (!trimmedName) return;
 
-      await createLabel({
-        variables: {
-          boardId,
-          name: trimmedName,
-          color,
-        },
-        optimisticResponse: {
-          createLabel: {
-            __typename: "Label",
-            id: `temp-${Date.now()}`,
-            boardId,
-            name: trimmedName,
-            color,
-          },
-        },
-      });
+      await createLabel({ name: trimmedName, color });
 
       resetForm();
       onClose();
     },
-    [boardId, color, createLabel, name, onClose, resetForm],
+    [color, createLabel, name, onClose, resetForm],
   );
 
   const handleClose = useCallback(() => {
