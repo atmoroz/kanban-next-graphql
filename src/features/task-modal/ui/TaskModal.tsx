@@ -5,6 +5,7 @@ import type { BoardLabel } from "@/entities/label";
 import { LabelBadge } from "@/entities/label";
 import { TaskActivityList, useTaskActivities } from "@/features/task-activity";
 import { isTaskFormPristine } from "@/features/task-form/model/is-task-form-pristine";
+import { useBoardMembers } from "@/features/task-modal/model/useBoardMembers";
 import { cn } from "@/shared/lib/cn";
 import { Input } from "@/shared/ui/input";
 import { Select } from "@/shared/ui/select";
@@ -21,6 +22,7 @@ export type TaskFormValues = {
   statusId: string;
   priority: TaskPriorityChoice;
   labelIds: string[];
+  assigneeId: string | null;
   dueDate?: string | null;
 };
 
@@ -35,6 +37,7 @@ type TaskModalProps = {
   open: boolean;
   onClose: () => void;
   onSubmit: (values: TaskFormValues) => void | Promise<void>;
+  boardId: string;
   statusOptions: TaskStatusOption[];
   labels: BoardLabel[];
   mode?: TaskModalMode;
@@ -43,6 +46,7 @@ type TaskModalProps = {
   initialStatusId?: string;
   initialPriority?: TaskPriorityChoice;
   initialLabelIds?: string[];
+  initialAssigneeId?: string | null;
   initialDueDate?: string | null;
   createdAt?: string | null;
   taskId?: string | null;
@@ -53,6 +57,7 @@ export function TaskModal({
   open,
   onClose,
   onSubmit,
+  boardId,
   statusOptions,
   labels,
   mode = "create",
@@ -61,6 +66,7 @@ export function TaskModal({
   initialStatusId,
   initialPriority = "medium",
   initialLabelIds = [],
+  initialAssigneeId = null,
   initialDueDate = null,
   createdAt,
   taskId,
@@ -68,13 +74,17 @@ export function TaskModal({
 }: TaskModalProps) {
   const initialResolvedStatusId = initialStatusId ?? statusOptions[0]?.id ?? "";
   const initialResolvedDueDate = initialDueDate ? initialDueDate.slice(0, 10) : "";
+  const initialResolvedAssigneeId = initialAssigneeId ?? "";
 
   const [title, setTitle] = useState(initialTitle);
   const [description, setDescription] = useState(initialDescription);
   const [statusId, setStatusId] = useState<string>(initialResolvedStatusId);
   const [priority, setPriority] = useState<TaskPriorityChoice>(initialPriority);
   const [selectedLabelIds, setSelectedLabelIds] = useState<string[]>(initialLabelIds);
+  const [assigneeId, setAssigneeId] = useState<string>(initialResolvedAssigneeId);
   const [dueDate, setDueDate] = useState<string>("");
+
+  const { members, loading: membersLoading } = useBoardMembers(boardId);
 
   const {
     activities,
@@ -93,6 +103,7 @@ export function TaskModal({
     setStatusId(initialResolvedStatusId);
     setPriority(initialPriority);
     setSelectedLabelIds(initialLabelIds);
+    setAssigneeId(initialResolvedAssigneeId);
     setDueDate(initialResolvedDueDate);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -115,6 +126,7 @@ export function TaskModal({
       statusId,
       priority,
       labelIds: selectedLabelIds,
+      assigneeId: assigneeId || null,
       dueDate: dueDate || null,
     });
   };
@@ -134,12 +146,14 @@ export function TaskModal({
     statusId,
     priority,
     selectedLabelIds,
+    assigneeId,
     dueDate,
     initialTitle,
     initialDescription,
     initialStatusId: initialResolvedStatusId,
     initialPriority,
     initialLabelIds,
+    initialAssigneeId: initialResolvedAssigneeId,
     initialDueDate: initialResolvedDueDate,
   });
 
@@ -241,6 +255,27 @@ export function TaskModal({
                       <option value="low">Low</option>
                       <option value="medium">Medium</option>
                       <option value="high">High</option>
+                    </Select>
+                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="task-assignee">Assignee</Label>
+                  <div className="relative">
+                    <Select
+                      id="task-assignee"
+                      className="h-9 w-full appearance-none"
+                      value={assigneeId}
+                      onChange={(event) => setAssigneeId(event.target.value)}
+                      disabled={membersLoading}
+                    >
+                      <option value="">Unassigned</option>
+                      {members.map((member) => (
+                        <option key={member.user.id} value={member.user.id}>
+                          {member.user.name ?? member.user.email}
+                        </option>
+                      ))}
                     </Select>
                     <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>

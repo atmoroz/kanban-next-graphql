@@ -4,17 +4,39 @@ import { getMainDefinition } from "@apollo/client/utilities";
 import { showErrorToast } from "@/shared/lib/toast";
 
 export const errorLink = new ErrorLink(({ error, operation }) => {
-  if (CombinedGraphQLErrors.is(error)) {
+  if (error && CombinedGraphQLErrors.is(error)) {
     const first = error.errors[0];
     const unauthorized = first?.extensions?.code === "UNAUTHORIZED";
     const message = first?.message ?? "Something went wrong while processing the request";
 
-    const def = operation?.query ? getMainDefinition(operation.query) : null;
-    const isSubscription =
-      def?.kind === "OperationDefinition" && def.operation === "subscription";
+    const code = first?.extensions?.code;
+    const messageLower = message.toLowerCase();
+    const isPermissionDenied =
+      code === "FORBIDDEN" ||
+      code === "INSUFFICIENT_PERMISSIONS" ||
+      messageLower.includes("insufficient permissions") ||
+      messageLower.includes("forbidden");
 
-    // Subscriptions may fail with UNAUTHORIZED (e.g. in another tab without cookie).
-    // Don't spam toasts / redirects for subscription auth failures.
+    const def = operation?.query ? getMainDefinition(operation.query) : null;
+    const isOperationDefinition = def?.kind === "OperationDefinition";
+    const operationType = isOperationDefinition ? def.operation : undefined;
+    const opName = isOperationDefinition
+      ? (def as { name?: { value?: string } }).name?.value
+      : undefined;
+
+    const isSubscription = operationType === "subscription";
+    const isQuery = operationType === "query";
+
+    // Permission-denied is expected for restricted users on some READ queries
+    // and can happen for subscriptions. For mutations we still want to show toast.
+    const isMembersInvitesFlow =
+      opName?.includes("BoardMembers") || opName?.includes("PendingInvites");
+
+    const shouldSilencePermissionDenied =
+      isPermissionDenied && (isSubscription || (isQuery && isMembersInvitesFlow));
+
+    if (shouldSilencePermissionDenied) return;
+
     if (!(unauthorized && isSubscription)) {
       showErrorToast(message);
     }

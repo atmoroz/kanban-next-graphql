@@ -9,12 +9,14 @@ type IsTaskFormPristineParams = {
   statusId: string;
   priority: TaskPriorityChoice;
   selectedLabelIds: string[];
+  assigneeId: string;
   dueDate: string;
   initialTitle: string;
   initialDescription: string;
   initialStatusId: string;
   initialPriority: TaskPriorityChoice;
   initialLabelIds: string[];
+  initialAssigneeId: string;
   initialDueDate: string;
 };
 
@@ -25,12 +27,14 @@ export function isTaskFormPristine({
   statusId,
   priority,
   selectedLabelIds,
+  assigneeId,
   dueDate,
   initialTitle,
   initialDescription,
   initialStatusId,
   initialPriority,
   initialLabelIds,
+  initialAssigneeId,
   initialDueDate,
 }: IsTaskFormPristineParams): boolean {
   if (mode !== "update") return false;
@@ -41,6 +45,7 @@ export function isTaskFormPristine({
     statusId === initialStatusId &&
     priority === initialPriority &&
     areArraysEqual(selectedLabelIds, initialLabelIds) &&
+    assigneeId === initialAssigneeId &&
     dueDate === initialDueDate
   );
 }

@@ -18,7 +18,7 @@ export function CreateTaskButton({ onClick, disabled }: CreateTaskButtonProps) {
       disabled={disabled}
     >
       <Plus className="mr-2 size-3" />
-      Create task
+      Task
     </Button>
   );
 }

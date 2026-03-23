@@ -7,6 +7,7 @@ import type { TaskPriority } from "@/graphql/generated/graphql";
 import type { BoardTask } from "../model/task.types";
 import type { BoardLabel } from "@/entities/label";
 import { LabelBadge } from "@/entities/label";
+import { toInitials } from "@/shared/lib/toInitials";
 
 type TaskCardProps = {
   task: BoardTask;
@@ -19,6 +20,7 @@ type TaskCardProps = {
   isDragDisabled?: boolean;
   moveTargets?: { id: string; label: string }[];
   isMoveDisabled?: boolean;
+  assigneeInitialsByUserId?: Record<string, string>;
   /** targetColumnId, targetIndex, and on drop — dragged task { id, columnId } */
   onMoveTo?: (
     targetColumnId: string,
@@ -42,6 +44,7 @@ export function TaskCard({
   isDragDisabled = false,
   moveTargets,
   isMoveDisabled,
+  assigneeInitialsByUserId,
   onMoveTo,
   onDragStart,
   onDragEnd,
@@ -74,6 +77,11 @@ export function TaskCard({
   const priorityMeta = priorityConfig[task.priority];
   const hasLabels = (task.labelIds?.length ?? 0) > 0;
   const hasMetaRow = Boolean(priorityMeta || task.dueDate);
+  const assigneeInitials = task.assigneeId
+    ? assigneeInitialsByUserId
+      ? (assigneeInitialsByUserId[task.assigneeId] ?? "")
+      : toInitials(undefined, task.assigneeId)
+    : "";
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMoveMenuOpen, setIsMoveMenuOpen] = useState(false);
@@ -209,28 +217,40 @@ export function TaskCard({
       {task.description && (
         <p className="line-clamp-2 text-xs text-muted-foreground">{task.description}</p>
       )}
-
-      {hasMetaRow && (
+      {priorityMeta && (
         <div className="mt-1 flex items-center justify-between gap-2 text-[11px]">
-          {priorityMeta && (
-            <span
-              className={[
-                "inline-flex items-center rounded-full border px-2 py-0.5 font-medium",
-                priorityMeta.className,
-              ].join(" ")}
-            >
-              {priorityMeta.label}
-            </span>
-          )}
-
-          <span className="ml-0 inline-flex items-center gap-1 text-xs text-muted-foreground">
-            Due date: &nbsp;{" "}
-            {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "--/--/--"}
+          <span className="ml-0 inline-flex items-center gap-2 text-xs text-muted-foreground">
+            Priority:&nbsp;{" "}
+          </span>
+          <span
+            className={[
+              "inline-flex items-center rounded-full border px-2 py-0.5 font-medium w-fit",
+              priorityMeta.className,
+            ].join(" ")}
+          >
+            {priorityMeta.label}
           </span>
         </div>
       )}
-
-      {/* TODO: labels (LabelBadge), assignee avatar and drag handle according to Figma design */}
+      {hasMetaRow && (
+        <div className="mt-1 flex items-center justify-between gap-2 text-[11px]">
+          <span className="ml-0 inline-flex items-center gap-2 text-xs text-muted-foreground">
+            Due date:&nbsp;{" "}
+            {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "--/--/--"}
+          </span>
+          {assigneeInitials && (
+            <span
+              className={[
+                "inline-flex h-7 w-7 items-center justify-center rounded-full",
+                "text-[10px] font-semibold border border-border bg-background/60 text-foreground",
+              ].join(" ")}
+              aria-label="Assignee"
+            >
+              {assigneeInitials}
+            </span>
+          )}
+        </div>
+      )}
 
       {isMenuOpen && (
         <div

@@ -11,7 +11,8 @@ export function Footer() {
         </div>
         <div className="flex items-center gap-6">
           <a
-            href="#"
+            href="https://kanban-graphql-document-platform-xh.vercel.app/"
+            target="_blank"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             Docs

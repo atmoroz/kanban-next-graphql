@@ -52,7 +52,7 @@ const wsLink =
           },
           on: {
             connected: () => {
-              showInfoToast("Realtime connected");
+              console.info("Realtime connected");
             },
           },
         }),
