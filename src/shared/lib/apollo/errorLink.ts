@@ -1,14 +1,25 @@
 import { ErrorLink } from "@apollo/client/link/error";
 import { CombinedGraphQLErrors, isErrorLike } from "@apollo/client/errors";
+import { getMainDefinition } from "@apollo/client/utilities";
 import { showErrorToast } from "@/shared/lib/toast";
 
-export const errorLink = new ErrorLink(({ error }) => {
+export const errorLink = new ErrorLink(({ error, operation }) => {
   if (CombinedGraphQLErrors.is(error)) {
     const first = error.errors[0];
     const unauthorized = first?.extensions?.code === "UNAUTHORIZED";
     const message = first?.message ?? "Something went wrong while processing the request";
-    showErrorToast(message);
+
+    const def = operation?.query ? getMainDefinition(operation.query) : null;
+    const isSubscription =
+      def?.kind === "OperationDefinition" && def.operation === "subscription";
+
+    // Subscriptions may fail with UNAUTHORIZED (e.g. in another tab without cookie).
+    // Don't spam toasts / redirects for subscription auth failures.
+    if (!(unauthorized && isSubscription)) {
+      showErrorToast(message);
+    }
     if (unauthorized) {
+      if (isSubscription) return;
       setTimeout(() => {
         if (typeof window !== "undefined") {
           window.location.href = "/login";
