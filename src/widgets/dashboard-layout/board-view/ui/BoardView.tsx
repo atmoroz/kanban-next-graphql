@@ -32,7 +32,7 @@ export function BoardView({ selectedBoard, isLoading }: BoardViewProps) {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col w-[60%] items-end gap-2">
                 <BoardMembersAvatars boardId={boardId} />
                 <BoardLabelsPanel
                   boardId={boardId}

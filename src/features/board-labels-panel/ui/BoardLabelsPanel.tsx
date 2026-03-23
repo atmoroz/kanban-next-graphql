@@ -43,24 +43,24 @@ export function BoardLabelsPanel({
   }
 
   return (
-    <div className="flex items-end gap-2">
-      <div className="flex flex-col items-end gap-1">
-        <div
-          className="flex w-[300px] justify-start gap-1 overflow-x-auto overflow-y-hidden whitespace-nowrap
+    <div className="flex w-full min-w-0 justify-end">
+      {/* <div className="flex flex-col items-end gap-1"> */}
+      <div
+        className="flex   gap-1 overflow-x-auto overflow-y-hidden whitespace-nowrap
           [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {labels.map((label) => (
-            <LabelBadge
-              key={label.id}
-              label={label}
-              onClick={() => handleOpenEditLabel(label)}
-              onDeleteClick={() => handleOpenDeleteLabel(label)}
-            />
-          ))}
-          {labels.length === 0 && (
-            <span className="text-xs text-muted-foreground">No labels yet</span>
-          )}
-        </div>
+      >
+        {labels.map((label) => (
+          <LabelBadge
+            key={label.id}
+            label={label}
+            onClick={() => handleOpenEditLabel(label)}
+            onDeleteClick={() => handleOpenDeleteLabel(label)}
+          />
+        ))}
+        {labels.length === 0 && (
+          <span className="text-xs text-muted-foreground">No labels yet</span>
+        )}
+        {/* </div> */}
       </div>
 
       <CreateLabelModal
