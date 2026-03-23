@@ -4,7 +4,18 @@ import { ApolloLink, HttpLink } from "@apollo/client";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { createClient } from "graphql-ws";
-import { showErrorToast, showInfoToast } from "@/shared/lib/toast";
+import { showInfoToast } from "@/shared/lib/toast";
+
+async function getWsAuthToken(): Promise<string | null> {
+  try {
+    const res = await fetch("/api/ws-token", { method: "GET" });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { token: string | null };
+    return data.token ?? null;
+  } catch {
+    return null;
+  }
+}
 
 function getHttpUri(): string {
   // All HTTP requests go through the edge proxy /api/graphql,
@@ -15,7 +26,12 @@ function getHttpUri(): string {
 function getWsUri(): string {
   const httpUrl = process.env.NEXT_PUBLIC_API_URL;
   if (!httpUrl) return "ws://localhost:4000/graphql";
-  return httpUrl.replace(/^http/, "ws");
+  const url = new URL(httpUrl);
+  url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
+  if (!url.pathname || url.pathname === "/") {
+    url.pathname = "/graphql";
+  }
+  return url.toString();
 }
 
 const httpLink = new HttpLink({
@@ -30,13 +46,13 @@ const wsLink =
           url: getWsUri(),
           lazy: true,
           retryAttempts: 5,
-          connectionParams: () => ({}),
+          connectionParams: async () => {
+            const token = await getWsAuthToken();
+            return token ? { Authorization: `Bearer ${token}` } : {};
+          },
           on: {
             connected: () => {
-              showInfoToast("Realtime connection established");
-            },
-            closed: () => {
-              showErrorToast("Realtime connection lost. Reconnecting…");
+              showInfoToast("Realtime connected");
             },
           },
         }),

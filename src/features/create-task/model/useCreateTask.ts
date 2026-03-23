@@ -131,13 +131,23 @@ export function useCreateTask({ boardId }: UseCreateTaskParams): UseCreateTaskRe
               ...withoutOptimistic,
             ];
 
+            // Prevent duplicates when both optimistic update and subscription
+            // (taskCreated) try to insert the same task.
+            const seen = new Set<string>();
+            const dedupedEdges = nextEdges.filter((edge) => {
+              const nodeId = edge.node.id;
+              if (seen.has(nodeId)) return false;
+              seen.add(nodeId);
+              return true;
+            });
+
             cache.writeQuery<TasksByBoardQuery, TasksByBoardQueryVariables>({
               query: TasksByBoardDocument,
               variables,
               data: {
                 tasksByBoard: {
                   __typename: "TaskConnection",
-                  edges: nextEdges,
+                  edges: dedupedEdges,
                   pageInfo: existing?.tasksByBoard.pageInfo ?? {
                     __typename: "PageInfo",
                     hasNextPage: false,

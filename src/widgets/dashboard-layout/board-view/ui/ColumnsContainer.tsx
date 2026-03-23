@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Column, ColumnFormModal, useColumns, type BoardColumn } from "@/entities/column";
@@ -15,9 +16,9 @@ import { DeleteTaskConfirmModal } from "@/features/delete-task";
 import { useUpdateTask } from "@/features/update-task";
 import { useUpdateTaskLabels } from "@/features/update-task-labels";
 import { useMoveTask } from "@/features/move-task";
+import { useBoardSubscriptionsSync } from "@/features/subscriptions-sync";
 import { TaskPriority } from "@/graphql/generated/graphql";
 import { areArraysEqual } from "@/shared/lib/array/are-arrays-equal";
-import { useState, useCallback } from "react";
 import { Toolbar } from "./Toolbar";
 
 type ColumnsContainerProps = {
@@ -26,7 +27,9 @@ type ColumnsContainerProps = {
 
 export function ColumnsContainer({ boardId }: ColumnsContainerProps) {
   const isSearchMode = useIsBoardSearchMode();
-  const { searchQuery } = useBoardFilters();
+  const { searchQuery: boardSearchQuery } = useBoardFilters();
+
+  useBoardSubscriptionsSync({ boardId });
 
   const { columns } = useColumns(boardId);
   const { labels } = useLabels(boardId);
@@ -148,7 +151,7 @@ export function ColumnsContainer({ boardId }: ColumnsContainerProps) {
       />
       <DndProvider backend={HTML5Backend}>
         <div className="flex h-full flex-col gap-4 overflow-auto">
-          <div className="flex flex-1 gap-4  pb-0">
+          <div className="flex flex-1 gap-4 pb-0">
             {columns.map((column) => (
               <Column
                 key={column.id}
@@ -181,12 +184,12 @@ export function ColumnsContainer({ boardId }: ColumnsContainerProps) {
                     targetColumnId,
                     position: targetIndex ?? undefined,
                     boardId,
-                    searchQuery: searchQuery,
+                    searchQuery: boardSearchQuery,
                   });
                 }}
                 boardId={boardId}
                 isSearchMode={isSearchMode}
-                searchQuery={searchQuery}
+                searchQuery={boardSearchQuery}
               />
             ))}
           </div>

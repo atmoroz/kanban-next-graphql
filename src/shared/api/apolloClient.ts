@@ -23,6 +23,9 @@ function createApolloClient() {
                 };
               },
             },
+            tasksByBoard: {
+              keyArgs: false,
+            },
             // Add keyArgs and merge for paginated fields (boards, tasksByColumn, etc.) when needed.
           },
         },

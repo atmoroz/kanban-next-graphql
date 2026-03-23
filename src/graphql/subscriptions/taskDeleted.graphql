@@ -1,0 +1,6 @@
+subscription TaskDeleted($boardId: ID!) {
+  taskDeleted(boardId: $boardId) {
+    id
+  }
+}
+
