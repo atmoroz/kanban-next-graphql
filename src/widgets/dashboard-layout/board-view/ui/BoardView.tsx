@@ -1,10 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@apollo/client/react";
+import type {
+  TasksByBoardQuery,
+  TasksByBoardQueryVariables,
+} from "@/graphql/generated/graphql";
+import { TasksByBoardDocument } from "@/graphql/generated/graphql";
 import type { SidebarBoard } from "@/entities/board";
 import { BoardLabelsPanel } from "@/features/board-labels-panel";
 import { BoardMembersAvatars } from "@/features/invite-board-member/ui/BoardMembersAvatars";
 import { ColumnsContainer } from "./ColumnsContainer";
+import { hasBoardPermission } from "@/shared/lib/permissions/boardPermissions";
 
 type BoardViewProps = {
   selectedBoard: SidebarBoard | null;
@@ -16,6 +23,21 @@ export function BoardView({ selectedBoard, isLoading }: BoardViewProps) {
   const boardId = selectedBoard?.id ?? null;
   const [isCreateLabelOpen, setIsCreateLabelOpen] = useState(false);
 
+  const { data: tasksData } = useQuery<TasksByBoardQuery, TasksByBoardQueryVariables>(
+    TasksByBoardDocument,
+    {
+      variables: { boardId: boardId ?? "", first: 100, query: undefined },
+      skip: !boardId,
+      // Important: don't trigger a network call here.
+      // We only need the count if other parts of the UI already populated the cache.
+      fetchPolicy: "cache-only",
+      returnPartialData: true,
+    },
+  );
+
+  const tasksCount = tasksData?.tasksByBoard?.edges?.length ?? 0;
+  const tasksLabel = useMemo(() => (tasksCount === 1 ? "task" : "tasks"), [tasksCount]);
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       {hasSelectedBoard ? (
@@ -26,18 +48,27 @@ export function BoardView({ selectedBoard, isLoading }: BoardViewProps) {
                 <div>
                   <h1 className="text-2xl font-semibold">{selectedBoard!.title}</h1>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {selectedBoard!.tasksCount} task
-                    {selectedBoard!.tasksCount !== 1 ? "s" : ""} •{" "}
+                    {tasksData ? tasksCount : "Loading…"} {tasksLabel} •{" "}
                     {selectedBoard!.visibility === "PUBLIC" ? "Public" : "Private"} board
                   </p>
                 </div>
               </div>
               <div className="flex flex-col w-[60%] items-end gap-2">
-                <BoardMembersAvatars boardId={boardId} />
+                <BoardMembersAvatars
+                  boardId={boardId}
+                  canManageBoardMembers={hasBoardPermission(
+                    selectedBoard!.permissions,
+                    "manageBoardMembers",
+                  )}
+                />
                 <BoardLabelsPanel
                   boardId={boardId}
                   createLabelOpen={isCreateLabelOpen}
                   onCreateLabelOpenChange={setIsCreateLabelOpen}
+                  canManageLabels={hasBoardPermission(
+                    selectedBoard!.permissions,
+                    "manageLabels",
+                  )}
                 />
               </div>
             </div>
@@ -52,6 +83,8 @@ export function BoardView({ selectedBoard, isLoading }: BoardViewProps) {
               <ColumnsContainer
                 boardId={selectedBoard.id}
                 onOpenCreateLabel={() => setIsCreateLabelOpen(true)}
+                permissions={selectedBoard.permissions}
+                hasTasks={tasksCount > 0}
               />
             )}
           </div>

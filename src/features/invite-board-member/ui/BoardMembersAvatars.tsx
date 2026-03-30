@@ -15,6 +15,7 @@ import { useBoardInvites } from "@/features/invite-board-member/model/useBoardIn
 import { InviteBoardMemberModal } from "@/features/invite-board-member/ui/InviteBoardMemberModal";
 import { DeleteBoardMemberConfirmModal } from "@/features/invite-board-member/ui/DeleteBoardMemberConfirmModal";
 import { toInitials } from "@/shared/lib/toInitials";
+import { useUser } from "@/shared/providers/auth-provider";
 
 type InviteItem = NonNullable<PendingInvitesQuery["pendingInvites"]>[number];
 type MemberItem = NonNullable<BoardMembersQuery["boardMembers"]>[number];
@@ -106,7 +107,7 @@ function AvatarWithTooltip({
       {hoverAction && (
         <button
           type="button"
-          className="absolute -top-1 -right-1 z-10 inline-flex h-4 w-4 items-center justify-center rounded-full bg-red-500/10 text-red-500 border border-red-500/30 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute -top-1 -right-1 z-10 inline-flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white border border-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
           aria-label="Remove member"
           onClick={(event) => {
             event.stopPropagation();
@@ -123,6 +124,7 @@ function AvatarWithTooltip({
           "inline-flex h-7 w-7 items-center justify-center rounded-full",
           "text-[10px] font-semibold border",
           className,
+          "transition-colors group-hover:border-primary/80 group-hover:ring-1 group-hover:ring-primary/30",
         ].join(" ")}
       >
         {label}
@@ -144,7 +146,14 @@ function AvatarWithTooltip({
   );
 }
 
-export function BoardMembersAvatars({ boardId }: { boardId: string | null }) {
+export function BoardMembersAvatars({
+  boardId,
+  canManageBoardMembers,
+}: {
+  boardId: string | null;
+  canManageBoardMembers: boolean;
+}) {
+  const user = useUser();
   const { pendingInvites, boardMembers, isLoading } = useBoardInvites({ boardId });
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<
@@ -203,29 +212,38 @@ export function BoardMembersAvatars({ boardId }: { boardId: string | null }) {
                 </span>
               </span>
             }
-            onClick={() => {
-              setEditTarget({
-                kind: "pending",
-                inviteId: invite.id,
-                email: invite.email,
-                status: invite.status,
-                role: invite.role,
-              });
-              setEditModalOpen(true);
-            }}
+            onClick={
+              canManageBoardMembers
+                ? () => {
+                    setEditTarget({
+                      kind: "pending",
+                      inviteId: invite.id,
+                      email: invite.email,
+                      status: invite.status,
+                      role: invite.role,
+                    });
+                    setEditModalOpen(true);
+                  }
+                : undefined
+            }
           />
         ))}
         {boardMembers.map((m: MemberItem) => {
+          const canRemoveThisMember = canManageBoardMembers && user?.id !== m.user.id;
           const classes = roleClasses(m.role);
           return (
             <AvatarWithTooltip
               key={`member-${m.user.id}`}
               label={toInitials(m.user.name ?? undefined, m.user.email)}
               className={[classes.bg, classes.text, classes.border].join(" ")}
-              hoverAction
-              onHoverActionClick={() => {
-                setRemoveTarget({ userId: m.user.id, email: m.user.email });
-              }}
+              hoverAction={canRemoveThisMember}
+              onHoverActionClick={
+                canRemoveThisMember
+                  ? () => {
+                      setRemoveTarget({ userId: m.user.id, email: m.user.email });
+                    }
+                  : undefined
+              }
               tooltip={
                 <span className="flex flex-col gap-0.5">
                   <span>Role: {m.role}</span>
@@ -234,15 +252,19 @@ export function BoardMembersAvatars({ boardId }: { boardId: string | null }) {
                   </span>
                 </span>
               }
-              onClick={() => {
-                setEditTarget({
-                  kind: "member",
-                  userId: m.user.id,
-                  email: m.user.email,
-                  role: m.role,
-                });
-                setEditModalOpen(true);
-              }}
+              onClick={
+                canManageBoardMembers
+                  ? () => {
+                      setEditTarget({
+                        kind: "member",
+                        userId: m.user.id,
+                        email: m.user.email,
+                        role: m.role,
+                      });
+                      setEditModalOpen(true);
+                    }
+                  : undefined
+              }
             />
           );
         })}

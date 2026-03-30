@@ -17,19 +17,27 @@ import { useUpdateTask } from "@/features/update-task";
 import { useUpdateTaskLabels } from "@/features/update-task-labels";
 import { useMoveTask } from "@/features/move-task";
 import { useBoardSubscriptionsSync } from "@/features/subscriptions-sync";
-import { TaskPriority } from "@/graphql/generated/graphql";
+import { TaskPriority, type BoardPermissions } from "@/graphql/generated/graphql";
 import { areArraysEqual } from "@/shared/lib/array/are-arrays-equal";
 import { InviteBoardMemberModal } from "@/features/invite-board-member/ui/InviteBoardMemberModal";
 import { Toolbar } from "./Toolbar";
 import { useBoardMembers } from "@/features/task-modal/model/useBoardMembers";
 import { toInitials } from "@/shared/lib/toInitials";
+import { hasBoardPermission } from "@/shared/lib/permissions/boardPermissions";
 
 type ColumnsContainerProps = {
   boardId: string;
   onOpenCreateLabel: () => void;
+  permissions: BoardPermissions;
+  hasTasks: boolean;
 };
 
-export function ColumnsContainer({ boardId, onOpenCreateLabel }: ColumnsContainerProps) {
+export function ColumnsContainer({
+  boardId,
+  onOpenCreateLabel,
+  permissions,
+  hasTasks,
+}: ColumnsContainerProps) {
   const isSearchMode = useIsBoardSearchMode();
   const { searchQuery: boardSearchQuery } = useBoardFilters();
 
@@ -38,6 +46,16 @@ export function ColumnsContainer({ boardId, onOpenCreateLabel }: ColumnsContaine
   const { columns } = useColumns(boardId);
   const { labels } = useLabels(boardId);
   const { members, loading: membersLoading } = useBoardMembers(boardId);
+
+  const canCreateTask = hasBoardPermission(permissions, "createTask");
+  const canUpdateTask = hasBoardPermission(permissions, "updateTask");
+  const canDeleteTask = hasBoardPermission(permissions, "deleteTask");
+  const canMoveCard = hasBoardPermission(permissions, "moveCard");
+  const canCreateColumn = hasBoardPermission(permissions, "createColumn");
+  const canManageLabels = hasBoardPermission(permissions, "manageLabels");
+  const canInviteMember = hasBoardPermission(permissions, "inviteMember");
+  // manageBoardMembers is handled in `BoardMembersAvatars`.
+  // NOTE: moveColumn currently affects column reordering (if/when implemented).
 
   const assigneeInitialsByUserId = useMemo(() => {
     if (membersLoading) return undefined;
@@ -168,8 +186,19 @@ export function ColumnsContainer({ boardId, onOpenCreateLabel }: ColumnsContaine
         setCreateTaskOpen={setCreateTaskOpen}
         columns={columns}
         createTaskLoading={createTaskLoading}
-        onOpenCreateLabel={onOpenCreateLabel}
-        onOpenInviteMember={() => setInviteMemberOpen(true)}
+        hasTasks={hasTasks}
+        onOpenCreateLabel={() => {
+          if (!canManageLabels) return;
+          onOpenCreateLabel();
+        }}
+        onOpenInviteMember={() => {
+          if (!canInviteMember) return;
+          setInviteMemberOpen(true);
+        }}
+        canCreateColumn={canCreateColumn}
+        canCreateTask={canCreateTask}
+        canManageLabels={canManageLabels}
+        canInviteMember={canInviteMember}
       />
       <DndProvider backend={HTML5Backend}>
         <div className="flex h-full flex-col gap-4 overflow-auto">
@@ -189,15 +218,27 @@ export function ColumnsContainer({ boardId, onOpenCreateLabel }: ColumnsContaine
                   setOpenMenuColumnId(null);
                   setColumnToDelete(col);
                 }}
-                onTaskClick={(task) => {
-                  setEditingTask(task);
-                }}
-                onTaskEdit={(task) => {
-                  setEditingTask(task);
-                }}
-                onTaskDelete={(task) => {
-                  setTaskToDelete(task);
-                }}
+                onTaskClick={
+                  canUpdateTask
+                    ? (task) => {
+                        setEditingTask(task);
+                      }
+                    : undefined
+                }
+                onTaskEdit={
+                  canUpdateTask
+                    ? (task) => {
+                        setEditingTask(task);
+                      }
+                    : undefined
+                }
+                onTaskDelete={
+                  canDeleteTask
+                    ? (task) => {
+                        setTaskToDelete(task);
+                      }
+                    : undefined
+                }
                 allColumns={columns}
                 onTaskMoveTo={(task, targetColumnId, targetIndex) => {
                   void moveTask({
@@ -213,6 +254,11 @@ export function ColumnsContainer({ boardId, onOpenCreateLabel }: ColumnsContaine
                 isSearchMode={isSearchMode}
                 searchQuery={boardSearchQuery}
                 assigneeInitialsByUserId={assigneeInitialsByUserId}
+                canEditColumn={canCreateColumn}
+                canDeleteColumn={canCreateColumn}
+                canUpdateTask={canUpdateTask}
+                canDeleteTask={canDeleteTask}
+                canMoveCard={canMoveCard}
               />
             ))}
           </div>
@@ -249,6 +295,7 @@ export function ColumnsContainer({ boardId, onOpenCreateLabel }: ColumnsContaine
             onClose={() => setCreateTaskOpen(false)}
             isSubmitting={createTaskLoading}
             boardId={boardId}
+            isOkDisabled={!canCreateTask}
             statusOptions={columns.map((column) => ({
               id: column.id,
               label: column.title,
@@ -269,6 +316,7 @@ export function ColumnsContainer({ boardId, onOpenCreateLabel }: ColumnsContaine
               mode="update"
               isSubmitting={labelsSubmitting}
               boardId={boardId}
+              isOkDisabled={!canUpdateTask}
               statusOptions={columns.map((column) => ({
                 id: column.id,
                 label: column.title,

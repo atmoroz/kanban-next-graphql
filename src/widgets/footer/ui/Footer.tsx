@@ -18,23 +18,12 @@ export function Footer() {
             Docs
           </a>
           <a
-            href="#"
+            href="https://github.com/atmoroz/kanban-next-graphql"
+            target="_blank"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             GitHub
           </a>
-          <Link
-            href="/privacy"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Privacy
-          </Link>
-          <Link
-            href="/terms"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Terms
-          </Link>
         </div>
       </div>
     </footer>

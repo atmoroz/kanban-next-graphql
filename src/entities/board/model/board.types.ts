@@ -1,3 +1,4 @@
+import type { BoardPermissions } from "@/graphql/generated/graphql";
 import { BoardVisibility } from "@/graphql/generated/graphql";
 
 export type SidebarBoard = {
@@ -5,6 +6,7 @@ export type SidebarBoard = {
   title: string;
   description?: string | null;
   visibility: BoardVisibility;
+  permissions: BoardPermissions;
   tasksCount: number;
 };
 

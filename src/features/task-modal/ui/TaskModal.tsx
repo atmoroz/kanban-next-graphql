@@ -51,6 +51,7 @@ type TaskModalProps = {
   createdAt?: string | null;
   taskId?: string | null;
   isSubmitting?: boolean;
+  isOkDisabled?: boolean;
 };
 
 export function TaskModal({
@@ -71,6 +72,7 @@ export function TaskModal({
   createdAt,
   taskId,
   isSubmitting = false,
+  isOkDisabled = false,
 }: TaskModalProps) {
   const initialResolvedStatusId = initialStatusId ?? statusOptions[0]?.id ?? "";
   const initialResolvedDueDate = initialDueDate ? initialDueDate.slice(0, 10) : "";
@@ -342,7 +344,7 @@ export function TaskModal({
           cancelText="Cancel"
           showCancel
           isLoading={isSubmitting}
-          isOkDisabled={mode === "update" && isPristine}
+          isOkDisabled={isOkDisabled || (mode === "update" && isPristine)}
         />
       </form>
     </Modal>
