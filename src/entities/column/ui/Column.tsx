@@ -25,6 +25,11 @@ type ColumnProps = {
   isSearchMode: boolean;
   searchQuery: string;
   assigneeInitialsByUserId?: Record<string, string>;
+  canEditColumn: boolean;
+  canDeleteColumn: boolean;
+  canUpdateTask: boolean;
+  canDeleteTask: boolean;
+  canMoveCard: boolean;
 };
 
 export function Column({
@@ -42,6 +47,9 @@ export function Column({
   isSearchMode,
   searchQuery,
   assigneeInitialsByUserId,
+  canEditColumn,
+  canDeleteColumn,
+  canMoveCard,
 }: ColumnProps) {
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -57,7 +65,8 @@ export function Column({
   const moveTargets = allColumns
     .filter((c) => c.id !== column.id)
     .map((c) => ({ id: c.id, label: c.title }));
-  const isMoveDisabled = allColumns.length <= 1;
+  const isMoveDisabled = !canMoveCard || allColumns.length <= 1;
+  const canOpenColumnMenu = canEditColumn || canDeleteColumn;
 
   const [{ isOver, showBackdrop }, dropRef] = useDrop<
     { id: string; columnId: string },
@@ -122,18 +131,22 @@ export function Column({
             {tasksCount}
           </span>
         </div>
-        <Button
-          type="button"
-          variant="secondary"
-          className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-background/80 text-xs text-muted-foreground hover:bg-muted"
-          onClick={() => onOpenMenu(isMenuOpen ? null : column.id)}
-          aria-label="Column actions"
-        >
-          <MoreHorizontal className="size-4" aria-hidden="true" />
-        </Button>
+        {canOpenColumnMenu ? (
+          <Button
+            type="button"
+            variant="secondary"
+            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-background/80 text-xs text-muted-foreground hover:bg-muted"
+            onClick={() => onOpenMenu(isMenuOpen ? null : column.id)}
+            aria-label="Column actions"
+          >
+            <MoreHorizontal className="size-4" aria-hidden="true" />
+          </Button>
+        ) : (
+          <span className="inline-flex h-7 w-7 shrink-0" />
+        )}
       </header>
 
-      <div className="relative flex-1 space-y-3  px-4 pb-16 text-sm text-muted-foreground">
+      <div className="relative flex-1 space-y-3  px-4 pb-24 text-sm text-muted-foreground">
         {showBackdrop && (
           <div
             className="absolute inset-0 z-10 rounded-b-lg bg-muted/80 pointer-events-none transition-opacity duration-150"
@@ -157,13 +170,13 @@ export function Column({
             moveTargets={moveTargets}
             isMoveDisabled={isMoveDisabled}
             onTaskMoveTo={onTaskMoveTo}
-            isDragDisabled={isSearchMode}
-          assigneeInitialsByUserId={assigneeInitialsByUserId}
+            isDragDisabled={!canMoveCard || isSearchMode}
+            assigneeInitialsByUserId={assigneeInitialsByUserId}
           />
         }
       </div>
 
-      {isMenuOpen && (
+      {isMenuOpen && canOpenColumnMenu && (
         <div
           ref={menuRef}
           className="absolute right-2 top-10 z-30 min-w-[160px] rounded-lg border border-border bg-popover p-1 text-sm shadow-lg"
@@ -172,6 +185,8 @@ export function Column({
           <Button
             type="button"
             variant="ghost"
+            disabled={!canEditColumn}
+            title={!canEditColumn ? "Нет пермиссий" : undefined}
             className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left justify-start h-auto text-foreground hover:bg-muted"
             onClick={() => {
               onOpenMenu(null);
@@ -184,6 +199,8 @@ export function Column({
           <Button
             type="button"
             variant="destructive"
+            disabled={!canDeleteColumn}
+            title={!canDeleteColumn ? "Нет пермиссий" : undefined}
             className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left justify-start h-auto"
             onClick={() => {
               onOpenMenu(null);

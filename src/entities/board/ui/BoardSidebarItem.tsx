@@ -29,6 +29,14 @@ export function BoardSidebarItem({
 }: BoardSidebarItemProps) {
   const rowRef = useRef<HTMLDivElement | null>(null);
 
+  // Sidebar "Edit/Delete" requires board-level management rights.
+  // Backend does not expose separate "editBoard/deleteBoard" flags here,
+  // so we reuse `manageBoardMembers` as a proxy capability.
+  const canManageBoard = board.permissions.manageBoardMembers;
+  const editEnabled = canManageBoard && !!onEdit;
+  const deleteEnabled = canManageBoard && !!onDelete;
+  const canOpenBoardMenu = editEnabled || deleteEnabled;
+
   useEffect(() => {
     if (!isMenuOpen) return;
     const handleMouseDown = (e: MouseEvent) => {
@@ -67,23 +75,25 @@ export function BoardSidebarItem({
         )}
         {board.title}
       </span>
-      <Button
-        type="button"
-        variant="secondary"
-        onClick={(e) => {
-          e.stopPropagation();
-          onOpenMenu(isMenuOpen ? null : board.id);
-        }}
-        className={cn(
-          "ml-2 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-background/80 text-xs text-muted-foreground",
-          selectedBoardId === board.id && "bg-primary-foreground/20",
-        )}
-        aria-label="Board actions"
-      >
-        <MoreHorizontal className="size-4" aria-hidden="true" />
-      </Button>
+      {canOpenBoardMenu && (
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenMenu(isMenuOpen ? null : board.id);
+          }}
+          className={cn(
+            "ml-2 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-background/80 text-xs text-muted-foreground",
+            selectedBoardId === board.id && "bg-primary-foreground/20",
+          )}
+          aria-label="Board actions"
+        >
+          <MoreHorizontal className="size-4" aria-hidden="true" />
+        </Button>
+      )}
 
-      {isMenuOpen && (
+      {isMenuOpen && canOpenBoardMenu && (
         <div
           className=" absolute right-1 top-10 z-30
             min-w-[160px]
@@ -100,12 +110,14 @@ export function BoardSidebarItem({
           <Button
             type="button"
             variant="ghost"
+            title={!editEnabled ? "Нет пермиссий" : undefined}
             className="flex w-full items-center gap-2
               rounded-md px-3 py-2
               text-sm
               hover:bg-muted
               transition-colors
               text-foreground justify-start h-auto"
+            disabled={!editEnabled}
             onClick={() => {
               onOpenMenu(null);
               onEdit?.(board);
@@ -117,7 +129,9 @@ export function BoardSidebarItem({
           <Button
             type="button"
             variant="destructive"
+            title={!deleteEnabled ? "Нет пермиссий" : undefined}
             className="flex w-full rounded-md items-center gap-2 px-3 py-2 text-left justify-start h-auto"
+            disabled={!deleteEnabled}
             onClick={() => {
               onOpenMenu(null);
               onDelete?.(board);

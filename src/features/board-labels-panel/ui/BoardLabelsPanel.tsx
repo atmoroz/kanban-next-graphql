@@ -10,12 +10,14 @@ type BoardLabelsPanelProps = {
   boardId: string | null;
   createLabelOpen: boolean;
   onCreateLabelOpenChange: (open: boolean) => void;
+  canManageLabels: boolean;
 };
 
 export function BoardLabelsPanel({
   boardId,
   createLabelOpen,
   onCreateLabelOpenChange,
+  canManageLabels,
 }: BoardLabelsPanelProps) {
   const { labels } = useLabels(boardId);
 
@@ -53,8 +55,10 @@ export function BoardLabelsPanel({
           <LabelBadge
             key={label.id}
             label={label}
-            onClick={() => handleOpenEditLabel(label)}
-            onDeleteClick={() => handleOpenDeleteLabel(label)}
+            onClick={canManageLabels ? () => handleOpenEditLabel(label) : undefined}
+            onDeleteClick={
+              canManageLabels ? () => handleOpenDeleteLabel(label) : undefined
+            }
           />
         ))}
         {labels.length === 0 && (
@@ -63,11 +67,13 @@ export function BoardLabelsPanel({
         {/* </div> */}
       </div>
 
-      <CreateLabelModal
-        open={createLabelOpen}
-        onClose={() => onCreateLabelOpenChange(false)}
-        boardId={boardId}
-      />
+      {canManageLabels && (
+        <CreateLabelModal
+          open={createLabelOpen}
+          onClose={() => onCreateLabelOpenChange(false)}
+          boardId={boardId}
+        />
+      )}
       <EditLabelModal
         open={!!labelToEdit}
         onClose={handleCloseEditLabel}

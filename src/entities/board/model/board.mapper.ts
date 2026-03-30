@@ -7,6 +7,7 @@ export function mapBoardToSidebar(board: GqlBoard): SidebarBoard {
     title: board.title,
     description: board.description ?? undefined,
     visibility: board.visibility,
+    permissions: board.permissions,
     // TODO: replace with the real tasks count once related data is available
     tasksCount: 0,
   };

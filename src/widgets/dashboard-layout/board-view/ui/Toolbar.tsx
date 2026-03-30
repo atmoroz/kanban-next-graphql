@@ -15,6 +15,11 @@ type ToolbarProps = {
   createTaskLoading: boolean;
   onOpenCreateLabel: () => void;
   onOpenInviteMember: () => void;
+  canCreateColumn: boolean;
+  canCreateTask: boolean;
+  canManageLabels: boolean;
+  canInviteMember: boolean;
+  hasTasks: boolean;
 };
 
 export const Toolbar = ({
@@ -26,26 +31,32 @@ export const Toolbar = ({
   createTaskLoading,
   onOpenCreateLabel,
   onOpenInviteMember,
+  canCreateColumn,
+  canCreateTask,
+  canManageLabels,
+  canInviteMember,
+  hasTasks,
 }: ToolbarProps) => {
   return (
     <div className="flex items-center justify-between gap-3 mb-4">
-      <BoardSearchInput />
+      {hasTasks ? <BoardSearchInput /> : <div className="w-[320px] max-w-full" />}
       <div className="flex items-center gap-2">
         <CreateColumnButton
           onClick={() => {
             setEditingColumn(null);
             setCreateOpen(true);
           }}
+          disabled={!canCreateColumn}
         />
         <CreateTaskButton
           onClick={() => {
             if (!firstColumnId) return;
             setCreateTaskOpen(true);
           }}
-          disabled={columns.length === 0 || createTaskLoading}
+          disabled={!canCreateTask || columns.length === 0 || createTaskLoading}
         />
-        <CreateLabelButton onClick={onOpenCreateLabel} disabled={columns.length === 0} />
-        <AddMemberButton onClick={onOpenInviteMember} />
+        <CreateLabelButton onClick={onOpenCreateLabel} disabled={!canManageLabels} />
+        <AddMemberButton onClick={onOpenInviteMember} disabled={!canInviteMember} />
       </div>
     </div>
   );
