@@ -1,0 +1,23 @@
+query TaskActivities($taskId: ID!, $first: Int, $after: String) {
+  taskActivities(taskId: $taskId, first: $first, after: $after) {
+    edges {
+      node {
+        id
+        entityType
+        entityId
+        action
+        diff
+        createdAt
+        actor {
+          id
+          email
+        }
+      }
+      cursor
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}

@@ -1,0 +1,17 @@
+subscription TaskUpdated($boardId: ID!) {
+  taskUpdated(boardId: $boardId) {
+    id
+    columnId
+    title
+    description
+    priority
+    statusId
+    labelIds
+    dueDate
+    assigneeId
+    position
+    createdAt
+    updatedAt
+  }
+}
+

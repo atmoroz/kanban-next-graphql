@@ -1,0 +1,25 @@
+mutation CreateBoard(
+  $title: String!
+  $description: String
+  $visibility: BoardVisibility!
+) {
+  createBoard(title: $title, description: $description, visibility: $visibility) {
+    id
+    title
+    description
+    permissions {
+      createTask
+      updateTask
+      deleteTask
+      moveCard
+      moveColumn
+      createColumn
+      manageLabels
+      inviteMember
+      manageBoardMembers
+    }
+    visibility
+    createdAt
+    updatedAt
+  }
+}

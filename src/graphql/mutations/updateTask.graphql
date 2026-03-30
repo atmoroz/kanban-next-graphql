@@ -1,0 +1,31 @@
+mutation UpdateTask(
+  $id: ID!
+  $title: String
+  $description: String
+  $priority: TaskPriority
+  $dueDate: DateTime
+  $assigneeId: ID
+) {
+  updateTask(
+    id: $id
+    title: $title
+    description: $description
+    priority: $priority
+    dueDate: $dueDate
+    assigneeId: $assigneeId
+  ) {
+    id
+    columnId
+    title
+    description
+    priority
+    statusId
+    labelIds
+    dueDate
+    assigneeId
+    position
+    createdAt
+    updatedAt
+  }
+}
+

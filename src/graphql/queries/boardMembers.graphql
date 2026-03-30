@@ -1,0 +1,11 @@
+query BoardMembers($boardId: ID!) {
+  boardMembers(boardId: $boardId) {
+    role
+    user {
+      id
+      name
+      email
+    }
+  }
+}
+

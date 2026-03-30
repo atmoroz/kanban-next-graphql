@@ -1,0 +1,12 @@
+query Columns($boardId: ID!) {
+  columns(boardId: $boardId) {
+    id
+    boardId
+    title
+    position
+    statusId
+    createdAt
+    updatedAt
+  }
+}
+

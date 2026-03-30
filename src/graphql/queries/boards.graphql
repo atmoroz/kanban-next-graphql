@@ -1,0 +1,49 @@
+query Boards(
+  $first: Int
+  $after: String
+  $last: Int
+  $before: String
+  $visibility: BoardVisibility
+  $sortBy: BoardSortBy
+  $sortOrder: SortOrder
+) {
+  boards(
+    first: $first
+    after: $after
+    last: $last
+    before: $before
+    visibility: $visibility
+    sortBy: $sortBy
+    sortOrder: $sortOrder
+  ) {
+    edges {
+      cursor
+      node {
+        id
+        title
+        description
+        permissions {
+          createTask
+          updateTask
+          deleteTask
+          moveCard
+          moveColumn
+          createColumn
+          manageLabels
+          inviteMember
+          manageBoardMembers
+        }
+        visibility
+        createdAt
+        updatedAt
+      }
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+  }
+}
+

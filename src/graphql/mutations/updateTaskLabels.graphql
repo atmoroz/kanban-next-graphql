@@ -1,0 +1,17 @@
+mutation UpdateTaskLabels($taskId: ID!, $labelIds: [ID!]!) {
+  updateTaskLabels(taskId: $taskId, labelIds: $labelIds) {
+    id
+    columnId
+    title
+    description
+    priority
+    statusId
+    labelIds
+    dueDate
+    assigneeId
+    position
+    createdAt
+    updatedAt
+  }
+}
+

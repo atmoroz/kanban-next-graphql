@@ -1,0 +1,45 @@
+{
+  "name": "kanban-next-graphql",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "codegen": "graphql-codegen",
+    "codegen:watch": "graphql-codegen --watch"
+  },
+  "dependencies": {
+    "@apollo/client": "^4.1.6",
+    "clsx": "^2.1.1",
+    "graphql": "^16.13.1",
+    "graphql-ws": "^6.0.7",
+    "lucide-react": "^0.576.0",
+    "next": "16.1.6",
+    "nextjs-toploader": "^3.9.17",
+    "react": "19.2.3",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
+    "react-dom": "19.2.3",
+    "tailwind-merge": "^3.5.0",
+    "zustand": "^5.0.11"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^6.1.2",
+    "@graphql-codegen/client-preset": "^5.2.3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "prettier": "^3.8.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

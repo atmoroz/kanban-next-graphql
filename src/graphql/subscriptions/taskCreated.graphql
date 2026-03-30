@@ -1,0 +1,17 @@
+subscription TaskCreated($boardId: ID!) {
+  taskCreated(boardId: $boardId) {
+    id
+    columnId
+    title
+    description
+    priority
+    statusId
+    labelIds
+    dueDate
+    assigneeId
+    position
+    createdAt
+    updatedAt
+  }
+}
+
