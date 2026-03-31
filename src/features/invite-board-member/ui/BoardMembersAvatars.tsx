@@ -20,19 +20,32 @@ import { useUser } from "@/shared/providers/auth-provider";
 type InviteItem = NonNullable<PendingInvitesQuery["pendingInvites"]>[number];
 type MemberItem = NonNullable<BoardMembersQuery["boardMembers"]>[number];
 
+const ROLE_ORDER: Record<BoardRole, number> = {
+  OWNER: 0,
+  ADMIN: 1,
+  MEMBER: 2,
+  VIEWER: 3,
+};
+
 function roleClasses(role: MemberItem["role"]) {
   switch (role) {
-    case "ADMIN":
+    case "OWNER":
       return {
-        bg: "bg-red-500/20",
-        text: "text-red-700",
-        border: "border-red-500/30",
+        bg: "bg-emerald-500/20",
+        text: "text-emerald-700",
+        border: "border-emerald-500/30",
       };
-    case "MEMBER":
+    case "ADMIN":
       return {
         bg: "bg-blue-500/20",
         text: "text-blue-700",
         border: "border-blue-500/30",
+      };
+    case "MEMBER":
+      return {
+        bg: "bg-orange-500/20",
+        text: "text-orange-700",
+        border: "border-orange-500/30",
       };
     case "VIEWER":
       return {
@@ -195,6 +208,11 @@ export function BoardMembersAvatars({
   const pendingOnly = pendingInvites.filter(
     (invite) => invite.status === InviteStatusEnum.Pending,
   );
+  const sortedBoardMembers = [...boardMembers].sort((a, b) => {
+    const roleOrderDiff = ROLE_ORDER[a.role] - ROLE_ORDER[b.role];
+    if (roleOrderDiff !== 0) return roleOrderDiff;
+    return a.user.email.localeCompare(b.user.email);
+  });
 
   return (
     <>
@@ -228,7 +246,7 @@ export function BoardMembersAvatars({
             }
           />
         ))}
-        {boardMembers.map((m: MemberItem) => {
+        {sortedBoardMembers.map((m: MemberItem) => {
           const canRemoveThisMember = canManageBoardMembers && user?.id !== m.user.id;
           const classes = roleClasses(m.role);
           return (
