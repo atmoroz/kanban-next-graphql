@@ -6,8 +6,10 @@ import { Footer } from "@/widgets/footer";
 import { getCurrentUser } from "@/features/auth/server/get-current-user";
 import { cookies } from "next/headers";
 import { DEFAULT_THEME, THEME_COOKIE_NAME, type Theme } from "@/shared/config/theme";
+import { env } from "@/shared/config/env";
 import { TopLoader } from "@/shared/ui/top-loader";
 import { AppProviders } from "./providers";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,6 +53,14 @@ export default async function RootLayout({
             <Footer />
           </div>
         </AppProviders>
+        {env.public.NEXT_PUBLIC_UMAMI_WEBSITE_ID ? (
+          <Script
+            id="umami-analytics"
+            strategy="afterInteractive"
+            src="https://cloud.umami.is/script.js"
+            data-website-id={env.public.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+          ></Script>
+        ) : null}
       </body>
     </html>
   );
