@@ -16,6 +16,7 @@ import {
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
+import { track } from "@/shared/lib/analytics";
 
 export function LoginForm() {
   const router = useRouter();
@@ -41,6 +42,7 @@ export function LoginForm() {
         return;
       }
 
+      track("login", { method: "credentials" });
       await apolloClient.clearStore();
       router.push("/");
       router.refresh();

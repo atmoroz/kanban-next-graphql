@@ -7,6 +7,7 @@ import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/shared/ui/modal";
 import { CreateBoardForm } from "./CreateBoardForm";
 import type { CreateBoardFormValues } from "./CreateBoardForm";
 import type { SidebarBoard } from "@/entities/board";
+import { track } from "@/shared/lib/analytics";
 import {
   BoardsDocument,
   CreateBoardDocument,
@@ -92,6 +93,10 @@ export function BoardFormModal({
         });
         const boardId = data?.createBoard?.id;
         if (boardId) {
+          track("create_board", {
+            boardId,
+            visibility: values.visibility,
+          });
           const next = new URLSearchParams(searchParams.toString());
           next.set("boardId", boardId);
           router.replace(`${pathname}?${next.toString()}`, { scroll: false });

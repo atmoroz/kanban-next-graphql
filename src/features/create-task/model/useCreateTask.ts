@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { useMutation } from "@apollo/client/react";
 import { CombinedGraphQLErrors } from "@apollo/client/errors";
+import { track } from "@/shared/lib/analytics";
 import {
   CreateTaskDocument,
   TasksByBoardDocument,
@@ -68,7 +69,7 @@ export function useCreateTask({ boardId }: UseCreateTaskParams): UseCreateTaskRe
       const dueDateIso = dueDate ? new Date(dueDate).toISOString() : null;
 
       try {
-        await mutate({
+        const { data } = await mutate({
           variables: {
             columnId,
             title: trimmed,
@@ -174,6 +175,15 @@ export function useCreateTask({ boardId }: UseCreateTaskParams): UseCreateTaskRe
             },
           },
         });
+
+        const createdTaskId = data?.createTask?.id;
+        if (createdTaskId) {
+          track("create_task", {
+            taskId: createdTaskId,
+            boardId: boardId ?? undefined,
+            columnId,
+          });
+        }
       } catch (err: unknown) {
         // errorLink already triggers toasts; prevent Next runtime overlay.
         if (!CombinedGraphQLErrors.is(err)) throw err;

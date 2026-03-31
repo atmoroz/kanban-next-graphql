@@ -15,6 +15,7 @@ import {
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
+import { track } from "@/shared/lib/analytics";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -39,6 +40,7 @@ export function RegisterForm() {
         setError(data.error ?? "Registration failed");
         return;
       }
+      track("register", { method: "credentials" });
       router.push("/login");
       router.refresh();
     } catch {
