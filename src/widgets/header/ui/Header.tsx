@@ -53,7 +53,7 @@ export function Header() {
             </div>
             <span className="text-xl font-semibold">TaskFlow</span>
           </Link>
-          <nav className="hidden md:flex items-center gap-6">
+          {/* <nav className="hidden md:flex items-center gap-6">
             <Link
               href="/"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -66,7 +66,7 @@ export function Header() {
             >
               Profile
             </Link>
-          </nav>
+          </nav> */}
         </div>
 
         <div className="flex items-center gap-3">
