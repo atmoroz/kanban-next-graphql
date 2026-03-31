@@ -1,5 +1,6 @@
 type PublicEnv = {
   NEXT_PUBLIC_API_URL?: string;
+  NEXT_PUBLIC_UMAMI_WEBSITE_ID?: string;
 };
 
 type ServerEnv = {
@@ -8,6 +9,7 @@ type ServerEnv = {
 
 const publicEnv: PublicEnv = {
   NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  NEXT_PUBLIC_UMAMI_WEBSITE_ID: process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID,
 };
 
 const serverEnv: ServerEnv = {

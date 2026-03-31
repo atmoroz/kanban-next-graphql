@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { useMutation } from "@apollo/client/react";
 import { CombinedGraphQLErrors } from "@apollo/client/errors";
+import { track } from "@/shared/lib/analytics";
 import {
   BoardsDocument,
   ColumnsDocument,
@@ -36,7 +37,7 @@ export function useCreateColumn({
       const now = new Date().toISOString();
 
       try {
-        await mutate({
+        const { data } = await mutate({
           variables: { boardId, title: trimmed },
           optimisticResponse: {
             createColumn: {
@@ -97,6 +98,14 @@ export function useCreateColumn({
             },
           },
         });
+
+        const createdColumnId = data?.createColumn?.id;
+        if (createdColumnId) {
+          track("create_column", {
+            boardId,
+            columnId: createdColumnId,
+          });
+        }
       } catch (err: unknown) {
         if (!CombinedGraphQLErrors.is(err)) throw err;
       }
