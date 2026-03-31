@@ -32,8 +32,8 @@ Kanban-дошка на `Next.js` + `GraphQL` з архітектурою `Featur
    Якщо `.env.example` відсутній, створіть `.env.local` вручну.
 4. Заповнити мінімальні змінні:
    ```env
-   NEXT_PUBLIC_API_URL=http://localhost:4000/graphql
-   GRAPHQL_API_URL=http://localhost:4000/graphql
+   NEXT_PUBLIC_API_URL=https://kanban-graphql-api.onrender.com/graphql
+   GRAPHQL_API_URL=https://kanban-graphql-api.onrender.com/graphql
    ```
 5. Запустити застосунок:
    ```bash
@@ -84,6 +84,11 @@ src/
 - бекенд підтримує GraphQL subscriptions по WebSocket
 - авторизаційний cookie присутній у браузері
 
+### GraphQL посилання
+- API endpoint: [https://kanban-graphql-api.onrender.com/graphql](https://kanban-graphql-api.onrender.com/graphql)
+- API query URL: [https://kanban-graphql-api.onrender.com/graphql?query](https://kanban-graphql-api.onrender.com/graphql?query)
+- Документація: [https://kanban-graphql-document-platform-xh.vercel.app/api](https://kanban-graphql-document-platform-xh.vercel.app/api)
+
 ---
 
 <a id="readme-en"></a>
@@ -116,8 +121,8 @@ A Kanban board built with `Next.js` + `GraphQL`, following `Feature-Sliced Desig
    If `.env.example` is missing, create `.env.local` manually.
 4. Add minimum required variables:
    ```env
-   NEXT_PUBLIC_API_URL=http://localhost:4000/graphql
-   GRAPHQL_API_URL=http://localhost:4000/graphql
+   NEXT_PUBLIC_API_URL=https://kanban-graphql-api.onrender.com/graphql
+   GRAPHQL_API_URL=https://kanban-graphql-api.onrender.com/graphql
    ```
 5. Start the app:
    ```bash
@@ -167,3 +172,8 @@ If realtime is not working, verify:
 - `NEXT_PUBLIC_API_URL` points to the GraphQL endpoint
 - backend supports GraphQL subscriptions over WebSocket
 - auth cookie is present in the browser
+
+### GraphQL Links
+- API endpoint: [https://kanban-graphql-api.onrender.com/graphql](https://kanban-graphql-api.onrender.com/graphql)
+- API query URL: [https://kanban-graphql-api.onrender.com/graphql?query](https://kanban-graphql-api.onrender.com/graphql?query)
+- Documentation: [https://kanban-graphql-document-platform-xh.vercel.app/api](https://kanban-graphql-document-platform-xh.vercel.app/api)
