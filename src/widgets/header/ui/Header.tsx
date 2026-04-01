@@ -102,13 +102,13 @@ export function Header() {
                     </p>
                   </div>
                   <div className="my-1 h-px bg-border" />
-                  <Link
+                  {/* <Link
                     href="/profile"
                     className="block rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
                     onClick={() => setMenuOpen(false)}
                   >
                     Profile
-                  </Link>
+                  </Link> */}
                   <Button
                     type="button"
                     variant="ghost"
